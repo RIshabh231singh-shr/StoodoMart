@@ -1,0 +1,43 @@
+const express = require("express");
+const app = express();
+
+const dotenv = require("dotenv");
+dotenv.config();
+
+const connectDB = require("./config/db");
+
+const redisClient = require("./config/redis");
+
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+
+app.use(express.json());
+
+//yet to solve cors issue
+
+const authRouter = require("./routes/UserAuth");
+const productRouter = require("./routes/productAuth");
+
+app.use("/person", authRouter);
+app.use("/product", productRouter);
+
+const startServer = async () => {
+  try {
+    // connect MongoDB first
+    await connectDB();
+    // connect Redis second
+    await redisClient.connect()
+    .then(()=> console.log("Redis connected"))
+    .catch((err) => console.log("Redis connection error:", err));
+
+    // start server last
+    app.listen(process.env.PORT, () => {
+      console.log(`Server running on port ${process.env.PORT}`);
+    });
+
+  } catch (error) {
+    console.error("Server start failed:", error);
+  }
+};
+
+startServer();
