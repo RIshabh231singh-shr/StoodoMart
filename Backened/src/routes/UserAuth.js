@@ -9,9 +9,9 @@ const AdminMiddleware = require("../middlewares/adminmiddleware");
 const userMiddleware = require("../middlewares/usermiddleware");
 const SuperMiddleware = require("../middlewares/superadminmiddleware");
 
-AuthRouter.post("/register",userMiddleware,register);
-AuthRouter.post("/login",userMiddleware,login);
-AuthRouter.post("/logout",userMiddleware,logout);
+AuthRouter.post("/register", register);
+AuthRouter.post("/login", login);
+AuthRouter.post("/logout", userMiddleware, logout);
 
 
 AuthRouter.put("/updateprofile",userMiddleware,updateprofile);
