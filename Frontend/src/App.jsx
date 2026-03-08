@@ -8,6 +8,8 @@ import Profile from './pages/Profile';
 import UpdateProfile from './pages/UpdateProfile';
 import AddProduct from './pages/AddProduct';
 import Home from './pages/Home';
+import About from './pages/About';
+import CategoryPage from './pages/CategoryPage';
 import AllProfiles from './pages/AllProfiles';
 import SuperAdminUpdateProfile from './pages/SuperAdminUpdateProfile';
 import MyProducts from './pages/MyProducts';
@@ -76,6 +78,8 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/category/:slug" element={<CategoryPage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/update-profile" element={<UpdateProfile />} />
         <Route 

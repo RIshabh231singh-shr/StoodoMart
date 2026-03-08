@@ -12,7 +12,7 @@ export default function Footer() {
 
       <div className="container mx-auto px-4 md:px-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-          
+
           {/* Brand & About */}
           <div>
             <Link to="/" className="flex items-center gap-3 mb-6">
@@ -48,20 +48,20 @@ export default function Footer() {
           <div>
             <h3 className="text-white text-base font-bold mb-6 uppercase tracking-wider">Customer Service</h3>
             <ul className="flex flex-col gap-3 mb-6">
-              <li><Link to="/shipping" className="text-sm hover:text-brand-teal transition-colors">Shipping & Delivery</Link></li>
+              <li><Link to="/buy and sell" className="text-sm hover:text-brand-teal transition-colors">Can buy and sell your products within college</Link></li>
               <li><Link to="/returns" className="text-sm hover:text-brand-teal transition-colors">Returns & Exchanges</Link></li>
               <li><Link to="/privacy" className="text-sm hover:text-brand-teal transition-colors">Privacy Policy</Link></li>
               <li><Link to="/terms" className="text-sm hover:text-brand-teal transition-colors">Terms of Service</Link></li>
             </ul>
-            
+
             <div className="flex flex-col gap-3 text-sm">
               <div className="flex items-start gap-3">
                 <MapPin size={18} className="text-brand-teal shrink-0 mt-0.5" />
-                <span>123 Commerce Avenue, Silicon Valley, CA 94025</span>
+                <span>Mega boys hotel 2 , NIT Calicut</span>
               </div>
               <div className="flex items-center gap-3">
                 <Phone size={18} className="text-brand-teal shrink-0" />
-                <span>+1 (800) 123-4567</span>
+                <span>+91 9876543210</span>
               </div>
               <div className="flex items-center gap-3">
                 <Mail size={18} className="text-brand-teal shrink-0" />
@@ -75,14 +75,14 @@ export default function Footer() {
             <h3 className="text-white text-base font-bold mb-6 uppercase tracking-wider">Newsletter</h3>
             <p className="text-sm mb-4 text-slate-400">Subscribe to our newsletter to receive updates on new products and special offers.</p>
             <form className="flex flex-col gap-3" onSubmit={(e) => e.preventDefault()}>
-              <input 
-                type="email" 
-                placeholder="Your email address" 
+              <input
+                type="email"
+                placeholder="Your email address"
                 className="bg-slate-800 border-none outline-none rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-brand-teal transition-all placeholder:text-slate-500"
                 required
               />
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="bg-gradient-to-r from-brand-teal to-brand-green text-white font-bold text-sm py-3 rounded-xl hover:shadow-[0_0_15px_rgba(0,229,255,0.4)] transition-all hover:-translate-y-0.5"
               >
                 SUBSCRIBE
