@@ -53,23 +53,33 @@ const register = async (req, res) => {
 
 const updateprofile = async (req,res)=>{
     try{
-        const validation = validateUser(req.body);
+        const validation = validateUser(req.body, true);
         if (!validation.isValid) {
             return res.status(400).json({ message: validation.message });
         }
 
-        //const { id } = req.params;
-        const id = req.user.id;
+        const { id } = req.params;
         if(!id){
             return res.status(400).json({ message: "Person ID is required" });
         }
-        const { firstname, lastname, email, password } = req.body;
+        
+        const { firstname, lastname, email, password, role } = req.body;
+        
+        const updateData = { firstname, lastname, email };
+        
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt);
+            updateData.password = hashedPassword;
+        }
+        
+        if (role) {
+            updateData.role = role;
+        }
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
         const updateperson = await Person.findByIdAndUpdate(
             id,
-            {firstname,lastname,email,password:hashedPassword},
+            updateData,
             {new:true,runValidators: true}
         )
         if (!updateperson) {
@@ -210,6 +220,19 @@ const logout = async (req,res)=>{
     }
 }
 
+const verifyAuth = async (req, res) => {
+    try {
+        // userMiddleware already fetched the user and attached it to req.user
+        res.status(200).json({
+            message: "User verified successfully",
+            person: req.user
+        });
+    } catch (error) {
+        console.error("Error verifying person:", error);
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+};
+
 module.exports = {
-    register , updateprofile , deleteprofile , login , getOneProfile , getAllProfile , logout
+    register , updateprofile , deleteprofile , login , getOneProfile , getAllProfile , logout, verifyAuth
 };

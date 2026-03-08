@@ -2,7 +2,7 @@ const express = require("express");
 const AuthRouter = express.Router();
 
 const {
-    register , updateprofile , deleteprofile , login , getOneProfile , getAllProfile , logout
+    register , updateprofile , deleteprofile , login , getOneProfile , getAllProfile , logout, verifyAuth
 } = require("../controllers/personverify");
 
 const AdminMiddleware = require("../middlewares/adminmiddleware");
@@ -14,15 +14,16 @@ AuthRouter.post("/login", login);
 AuthRouter.post("/logout", userMiddleware, logout);
 
 
-AuthRouter.put("/updateprofile",userMiddleware,updateprofile);
-AuthRouter.put("/superupdateprofile",SuperMiddleware,updateprofile);
+AuthRouter.put("/updateprofile/:id",userMiddleware,updateprofile);
 
-AuthRouter.delete("/deleteprofile",userMiddleware,deleteprofile);
-AuthRouter.delete("/superdeleteprofile",SuperMiddleware,deleteprofile);
+AuthRouter.delete("/deleteprofile/:id",userMiddleware,deleteprofile);
+AuthRouter.delete("/superdeleteprofile/:id",SuperMiddleware,deleteprofile);
 
-AuthRouter.get("/getOneProfile",userMiddleware,getOneProfile);
-AuthRouter.get("/supergetOneProfile",SuperMiddleware,getOneProfile);
+AuthRouter.get("/getOneProfile/:id",userMiddleware,getOneProfile);
+AuthRouter.get("/supergetOneProfile/:id",SuperMiddleware,getOneProfile);
 
 AuthRouter.get("/supergetAllProfile",SuperMiddleware,getAllProfile);
+
+AuthRouter.get("/verify", userMiddleware, verifyAuth);
 
 module.exports = AuthRouter;

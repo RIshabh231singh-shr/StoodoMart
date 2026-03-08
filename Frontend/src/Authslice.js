@@ -20,20 +20,34 @@ export const RegisterUser = createAsyncThunk("auth/register", async (registerDat
     }
 });
 
+export const CheckAuthThunk = createAsyncThunk("auth/check", async (_, { rejectWithValue }) => {
+    try {
+        const response = await axiosClient.get("/person/verify");
+        return response.data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data?.message || "Verify failed");
+    }
+});
+
+export const LogoutUserThunk = createAsyncThunk("auth/logout", async (_, { rejectWithValue }) => {
+    try {
+        const response = await axiosClient.post("/person/logout");
+        return response.data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data?.message || "Logout failed");
+    }
+});
+
 const authSlice = createSlice({
     name:"auth",
     initialState:{
         user:null,
         isAuthenticated:false,
-        loading:false,
+        loading:true, // Default to true while we verify
         error:null
     },
     reducers:{
-        LogoutUser: (state) => {
-            state.user = null;
-            state.isAuthenticated = false;
-            state.error = null;
-        }
+        // Replaced by extraReducers for LogoutUserThunk
     },
     extraReducers:(builder)=>{
         builder
@@ -65,8 +79,27 @@ const authSlice = createSlice({
             state.loading = false;
             state.error = action.payload;
         })
+        //for check auth
+        .addCase(CheckAuthThunk.pending, (state) => {
+            state.loading = true;
+        })
+        .addCase(CheckAuthThunk.fulfilled, (state, action) => {
+            state.loading = false;
+            state.user = action.payload.person;
+            state.isAuthenticated = !!action.payload.person;
+        })
+        .addCase(CheckAuthThunk.rejected, (state) => {
+            state.loading = false;
+            state.user = null;
+            state.isAuthenticated = false;
+        })
+        //for logout
+        .addCase(LogoutUserThunk.fulfilled, (state) => {
+            state.user = null;
+            state.isAuthenticated = false;
+            state.error = null;
+        });
     }
 });
-export const { LogoutUser } = authSlice.actions;
 
 export default authSlice.reducer;

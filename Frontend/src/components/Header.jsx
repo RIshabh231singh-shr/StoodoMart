@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useSelector, useDispatch } from 'react-redux';
 import { ShoppingCart, Search, User, Package, LogOut, ChevronDown, Menu, X } from 'lucide-react';
-import { LogoutUser } from '../Authslice'; // We'll add this action to Authslice next
+import { LogoutUserThunk } from '../Authslice';
 import logo from '../assets/logo.png';
 
 export default function Header() {
@@ -35,8 +35,8 @@ export default function Header() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    dispatch(LogoutUser());
+  const handleLogout = async () => {
+    await dispatch(LogoutUserThunk());
     setProfileDropdownOpen(false);
     navigate('/login');
   };
