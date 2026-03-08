@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router';
+import { useNavigate, Link } from 'react-router';
 import { LoginUser } from '../Authslice';
 import logo from '../assets/logo.png';
 
@@ -134,7 +134,7 @@ export default function Login() {
 
         <div className="mt-8 text-center text-[0.95rem] text-slate-600">
           New to StoodoMart? 
-          <a href="/signup" className="font-bold text-brand-red no-underline ml-2 relative after:content-[''] after:absolute after:w-full after:h-[2px] after:-bottom-[2px] after:left-0 after:bg-brand-red after:scale-x-0 after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left">Create an account</a>
+          <Link to="/signup" className="font-bold text-brand-red no-underline ml-2 relative after:content-[''] after:absolute after:w-full after:h-[2px] after:-bottom-[2px] after:left-0 after:bg-brand-red after:scale-x-0 after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left">Create an account</Link>
         </div>
         
       </div>

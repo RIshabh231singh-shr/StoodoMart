@@ -2,14 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useNavigate, Link } from "react-router";
-import { useSelector, useDispatch } from "react-redux";
+import { useNavigate, Link, useParams } from "react-router";
 import axiosClient from "../utility/axios";
-import { CheckAuthThunk } from "../Authslice";
 import logo from "../assets/logo.png";
-import { Loader2, User, Mail, ShieldAlert } from "lucide-react";
+import { Loader2, User, Mail, ShieldAlert, ArrowLeft } from "lucide-react";
 
-// Matches backend validation setup but makes password optional for updates
 const updateSchemaBase = z.object({
   firstname: z.string().min(1, "Firstname is required"),
   lastname: z.string().optional(),
@@ -17,14 +14,13 @@ const updateSchemaBase = z.object({
   role: z.enum(["User", "Admin", "SuperAdmin"]).optional(),
 });
 
-export default function UpdateProfile() {
+export default function SuperAdminUpdateProfile() {
   const [apiError, setApiError] = useState("");
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
 
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { id } = useParams();
 
   const {
     register,
@@ -41,15 +37,10 @@ export default function UpdateProfile() {
     },
   });
 
-  // Fetch full user data on mount to fill in form
   useEffect(() => {
     const fetchUserData = async () => {
-      if (!isAuthenticated || !user) {
-        navigate("/login");
-        return;
-      }
       try {
-        const response = await axiosClient.get(`/person/getOneProfile/${user._id}`);
+        const response = await axiosClient.get(`/person/supergetOneProfile/${id}`);
         const profileData = response.data.person;
         
         setValue("firstname", profileData.firstname || "");
@@ -64,26 +55,21 @@ export default function UpdateProfile() {
       }
     };
     
-    fetchUserData();
-  }, [user, isAuthenticated, navigate, setValue]);
+    if (id) {
+        fetchUserData();
+    }
+  }, [id, setValue]);
 
   const onSubmit = async (data) => {
     setLoading(true);
     setApiError("");
 
     try {
-      // Clean up optional fields
       const payload = { ...data };
-      // Only SuperAdmins can send role
-      if (user?.role !== "SuperAdmin") delete payload.role;
-
-      await axiosClient.put(`/person/updateprofile/${user._id}`, payload);
+      await axiosClient.put(`/person/updateprofile/${id}`, payload);
       
-      // Update global redux state silently behind the scenes
-      dispatch(CheckAuthThunk());
-      
-      // Send back to profile page
-      navigate("/profile");
+      // Send back to all profiles page
+      navigate("/superadmin/all-profiles");
     } catch (err) {
       setApiError(err.response?.data?.message || "Failed to update profile. Please try again.");
     } finally {
@@ -95,12 +81,16 @@ export default function UpdateProfile() {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center bg-slate-800 bg-gradient-to-br from-indigo-500/40 via-purple-500/40 to-slate-800/40 absolute inset-0 z-50 p-6">
          <div className="animate-pulse flex flex-col items-center gap-5 w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2rem] p-8 shadow-2xl">
+            {/* Shimmer for Title */}
             <div className="h-8 w-3/4 bg-white/20 rounded-xl mb-4"></div>
+            {/* Shimmer for Inputs */}
             <div className="flex gap-4 w-full">
               <div className="h-12 w-1/2 bg-white/20 rounded-xl"></div>
               <div className="h-12 w-1/2 bg-white/20 rounded-xl"></div>
             </div>
             <div className="h-12 w-full bg-white/20 rounded-xl mb-2"></div>
+            <div className="h-12 w-full bg-white/20 rounded-xl"></div>
+            {/* Shimmer for Button */}
             <div className="h-14 w-full bg-indigo-500/30 rounded-xl mt-4"></div>
          </div>
       </div>
@@ -112,30 +102,30 @@ export default function UpdateProfile() {
       
       {/* Navbar Integration */}
       <nav className="relative z-20 px-8 py-5 border-b border-white/20 flex items-center justify-between w-full bg-white/10 backdrop-blur-md">
-        <Link to="/" className="flex items-center gap-3 group">
-          <div className="bg-white/10 p-2 rounded-xl backdrop-blur-md transition-all group-hover:bg-white/20">
-            <img src={logo} alt="StoodoMart Logo" className="w-10 h-auto" />
-          </div>
-          <h1 className="text-xl font-extrabold tracking-tight text-white drop-shadow-md">
-            Stoodo<span className="text-purple-400">Mart</span>
-          </h1>
-        </Link>
-        <Link to="/profile" className="px-5 py-2 rounded-xl text-sm font-bold bg-white/10 text-white hover:bg-white/20 transition-colors backdrop-blur-md">
-           Cancel
-        </Link>
+        <div className="flex items-center gap-4">
+            <Link to="/superadmin/all-profiles" className="bg-white/10 p-2 rounded-full text-white hover:bg-white/20 transition-all backdrop-blur-md">
+                <ArrowLeft size={20} />
+            </Link>
+            <div className="flex items-center gap-3">
+            <h1 className="text-xl font-extrabold tracking-tight text-white drop-shadow-md flex items-center gap-2">
+                <img src={logo} alt="StoodoMart Logo" className="w-8 h-8 opacity-90" />
+                Stoodo<span className="text-purple-400">Mart</span>
+            </h1>
+            <span className="text-slate-300 font-medium border-l border-white/30 pl-3">SuperAdmin Hub</span>
+            </div>
+        </div>
       </nav>
 
       {/* Main Content Area */}
-      <div className="relative z-10 flex-1 flex flex-col justify-center items-center p-6 mt-4
-      ">
+      <div className="relative z-10 flex-1 flex flex-col justify-center items-center p-6 mt-4">
         
-        <div className="max-w-md w-full backdrop-blur-3xl border border-white/20 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden transform transition-all duration-300
-        bg-white/0.1 backdrop-blur-xl border border-white/40 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)]
+        <div className="max-w-md w-full backdrop-blur-3xl overflow-hidden transform transition-all duration-300
+        bg-white/10 border border-white/20 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)]
         ">
           <div className="p-8">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-extrabold text-white mb-2">Update Profile</h2>
-              <p className="text-slate-300">Modify your account information</p>
+              <h2 className="text-3xl font-extrabold text-white mb-2">Edit User Profile</h2>
+              <p className="text-slate-300">Update system privileges and user details</p>
             </div>
 
             {apiError && (
@@ -190,26 +180,23 @@ export default function UpdateProfile() {
                 {errors.email && <p className="text-red-400 text-xs ml-1 font-medium">{errors.email.message}</p>}
               </div>
 
-              {/* Conditional Role Selection for SuperAdmin Only */}
-              {user?.role === "SuperAdmin" && (
-                <div className="space-y-2 relative">
-                  <label className="text-sm font-bold text-purple-400 ml-1">Role (SuperAdmin Only)</label>
-                  <select
-                    {...register("role")}
-                    className="w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all appearance-none cursor-pointer"
-                  >
-                    <option value="User">User</option>
-                    <option value="Admin">Admin</option>
-                    <option value="SuperAdmin">SuperAdmin</option>
-                  </select>
-                  {errors.role && <p className="text-red-400 text-xs ml-1 font-medium">{errors.role.message}</p>}
-                </div>
-              )}
+              <div className="space-y-2 relative">
+                <label className="text-sm font-bold text-purple-400 ml-1">System Role</label>
+                <select
+                  {...register("role")}
+                  className="w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all appearance-none cursor-pointer"
+                >
+                  <option value="User">User</option>
+                  <option value="Admin">Admin</option>
+                  <option value="SuperAdmin">SuperAdmin</option>
+                </select>
+                {errors.role && <p className="text-red-400 text-xs ml-1 font-medium">{errors.role.message}</p>}
+              </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-4 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black rounded-xl shadow-lg shadow-purple-500/20 transition-all active:scale-[0.98] mt-6 flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed"
+                className="w-full py-4 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black rounded-xl shadow-lg shadow-purple-500/20 transition-all active:scale-[0.98] mt-6 flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed border border-purple-400/30"
               >
                 {loading ? (
                   <div className="flex gap-2 items-center">
@@ -218,7 +205,7 @@ export default function UpdateProfile() {
                     <div className="w-2 h-2 rounded-full bg-white animate-pulse delay-150"></div>
                   </div>
                 ) : (
-                  "Publish Changes"
+                  "Save User Changes"
                 )}
               </button>
             </form>

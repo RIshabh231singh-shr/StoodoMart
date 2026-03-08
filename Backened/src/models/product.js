@@ -33,6 +33,11 @@ const productSchema = new Schema({
         type : Number,
         required : true,
     },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Person",
+        required: true,
+    }
 },{
     timestamps: true,
 });

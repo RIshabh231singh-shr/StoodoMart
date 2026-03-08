@@ -50,9 +50,17 @@ export default function Profile() {
   };
 
   if (loading) return (
-    <div className="flex flex-col min-h-screen bg-slate-900 bg-gradient-to-br from-indigo-900/40 via-purple-900/40 to-slate-900 font-sans relative overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-slate-900 bg-gradient-to-br from-indigo-900/40 via-purple-900/40 to-slate-900 font-sans relative overflow-hidden p-6">
       <main className="flex-grow flex items-center justify-center relative z-10">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-white border-solid shadow-[0_0_15px_rgba(255,255,255,0.5)]"></div>
+         <div className="animate-pulse flex flex-col items-center gap-5 w-full max-w-md bg-white/5 backdrop-blur-md border border-white/10 rounded-[2rem] p-8 shadow-2xl">
+            <div className="w-28 h-28 bg-white/20 rounded-full mb-4"></div>
+            <div className="h-8 w-3/4 bg-white/20 rounded-xl mb-6"></div>
+            <div className="h-24 w-full bg-white/20 rounded-2xl mb-6"></div>
+            <div className="flex gap-4 w-full">
+              <div className="h-14 w-1/2 bg-white/20 rounded-xl"></div>
+              <div className="h-14 w-1/2 bg-red-500/30 rounded-xl"></div>
+            </div>
+         </div>
       </main>
     </div>
   );
@@ -82,16 +90,24 @@ export default function Profile() {
         </Link>
         <div className="flex gap-4">
           {(profileData.role === 'Admin' || profileData.role === 'SuperAdmin') && (
-            <button 
-              onClick={() => navigate('/add-product')}
-              className="px-5 py-2 bg-white/20 hover:bg-white/30 text-white font-bold rounded-xl transition-all border border-white/30 shadow-[0_4px_15px_rgba(0,0,0,0.1)] hover:-translate-y-0.5"
-            >
-              Add Product
-            </button>
+            <div className="flex gap-4">
+              <button 
+                onClick={() => navigate('/add-product')}
+                className="px-5 py-2 bg-white/20 hover:bg-white/30 text-white font-bold rounded-xl transition-all border border-white/30 shadow-[0_4px_15px_rgba(0,0,0,0.1)] hover:-translate-y-0.5"
+              >
+                Add Product
+              </button>
+              <button 
+                onClick={() => navigate('/my-products')}
+                className="px-5 py-2 bg-indigo-500/30 hover:bg-indigo-500/50 text-indigo-100 font-bold rounded-xl transition-all border border-indigo-400/50 shadow-[0_4px_15px_rgba(99,102,241,0.2)] hover:-translate-y-0.5"
+              >
+                My Products
+              </button>
+            </div>
           )}
           {profileData.role === 'SuperAdmin' && (
             <button 
-              onClick={() => navigate('/all-profiles')}
+              onClick={() => navigate('/superadmin/all-profiles')}
               className="px-5 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:to-indigo-500 text-white font-extrabold rounded-xl transition-all shadow-[0_4px_15px_rgba(99,102,241,0.3)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.4)] hover:-translate-y-0.5 border border-indigo-400/50"
             >
               Get All Profiles

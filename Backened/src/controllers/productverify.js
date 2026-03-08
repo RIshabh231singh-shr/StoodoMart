@@ -12,7 +12,14 @@ const CreateProduct = async (req,res) => {
         if(stock < 0){
             return res.status(400).json({ message: "Stock cannot be negative" });
         }
-        const product = await Product.create(req.body);
+        
+        // Attach the user from the adminMiddleware
+        const productData = {
+            ...req.body,
+            createdBy: req.user._id
+        };
+
+        const product = await Product.create(productData);
         res.status(201).json({ message: "Product created successfully", product });
     } catch (error) {
         console.error("Error creating product:", error);
@@ -93,10 +100,41 @@ const GetAllProduct = async (req,res)=>{
     }
 }
 
+const GetMyProducts = async (req, res) => {
+    try {
+        let { page } = req.query;
+        page = parseInt(page) || 1;
+        const limit = 10;
+        const skip = (page - 1) * limit;
+
+        const userId = req.user._id;
+
+        const myProducts = await Product.find({ createdBy: userId })
+            .skip(skip)
+            .limit(limit)
+            .populate("createdBy", "firstname lastname email role"); // Optional: populate user details
+        
+        const totalProducts = await Product.countDocuments({ createdBy: userId });
+        const totalPages = Math.ceil(totalProducts / limit);
+
+        res.status(200).json({ 
+            message: "Products fetched successfully", 
+            products: myProducts,
+            totalPages,
+            currentPage: page,
+            totalProducts
+        });
+    } catch (error) {
+        console.error("Error finding user's products:", error);
+        res.status(500).json({ message: error.message });
+    }
+}
+
 module.exports = {
     CreateProduct,
     UpdateProduct,
     DeleteProduct,
     GetOneProduct,
-    GetAllProduct
+    GetAllProduct,
+    GetMyProducts
 };

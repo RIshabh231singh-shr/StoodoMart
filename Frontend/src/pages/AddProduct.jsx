@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useNavigate, Link } from "react-router";
+import { Link } from "react-router";
 import axiosClient from "../utility/axios";
 import logo from "../assets/logo.png";
 import { Loader2, Package, Tag, FileText, Image as ImageIcon, LayoutList, Hash, CheckCircle, AlertCircle } from "lucide-react";
@@ -21,8 +21,6 @@ export default function AddProduct() {
   const [apiError, setApiError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [loading, setLoading] = useState(false);
-  
-  const navigate = useNavigate();
 
   const {
     register,
@@ -198,10 +196,16 @@ export default function AddProduct() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md shadow-indigo-200 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md shadow-indigo-200 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2 min-w-[170px] justify-center"
                 >
-                  {loading && <Loader2 size={18} className="animate-spin" />}
-                  {loading ? "Creating..." : "Create Product"}
+                  {loading ? (
+                    <div className="flex gap-2 items-center">
+                      <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse delay-75"></div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse delay-150"></div>
+                      <span className="ml-1">Creating...</span>
+                    </div>
+                  ) : "Create Product"}
                 </button>
               </div>
 

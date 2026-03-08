@@ -63,6 +63,14 @@ const updateprofile = async (req,res)=>{
             return res.status(400).json({ message: "Person ID is required" });
         }
         
+        const loggedInUserId = req.user.id;
+        const loggedInUserRole = req.user.role;
+        if (loggedInUserRole !== "SuperAdmin" && loggedInUserId !== id) {
+            return res.status(403).json({
+                message: "You are not allowed to update this user"
+            });
+        }
+        
         const { firstname, lastname, email, password, role } = req.body;
         
         const updateData = { firstname, lastname, email };
@@ -186,14 +194,26 @@ const getOneProfile = async (req,res)=>{
 
 const getAllProfile = async (req,res)=>{
     try{
-        const person = await Person.find().select("-password");
-        if(person.length === 0){
-            return res.status(404).json({ message: "Person not found" });
+        let { page, limit, email } = req.query;
+        page = parseInt(page) || 1;
+        limit = parseInt(limit) || 10;
+        const skip = (page - 1) * limit;
+
+        let query = {};
+        if (email) {
+            query.email = { $regex: email, $options: 'i' };
         }
+
+        const person = await Person.find(query).select("-password").skip(skip).limit(limit);
+        const totalPersons = await Person.countDocuments(query);
+        const totalPages = Math.ceil(totalPersons / limit);
 
         res.status(200).json({
             message: "Person profile fetched successfully",
             person: person,
+            currentPage: page,
+            totalPages: totalPages,
+            totalPersons: totalPersons
         })
     }
     catch(error){

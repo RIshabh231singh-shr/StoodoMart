@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router';
+import { useNavigate, Link } from 'react-router';
 import { RegisterUser } from '../Authslice';
 import logo from '../assets/logo.png';
 
@@ -51,7 +51,8 @@ export default function Signup() {
 
   const onSubmit = (data) => {
     // Exclude confirmPassword and append a default role if needed by backend.
-    const { confirmPassword, ...registerData } = data;
+    const registerData = { ...data };
+    delete registerData.confirmPassword;
     registerData.role = 'User'; // Default role (adjust if your backend expects something else)
     
     dispatch(RegisterUser(registerData));
@@ -211,7 +212,7 @@ export default function Signup() {
 
         <div className="mt-8 text-center text-[0.95rem] text-slate-600">
           Already have an account? 
-          <a href="/login" className="font-bold text-brand-red no-underline ml-2 relative after:content-[''] after:absolute after:w-full after:h-[2px] after:-bottom-[2px] after:left-0 after:bg-brand-red after:scale-x-0 after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left">Log in</a>
+          <Link to="/login" className="font-bold text-brand-red no-underline ml-2 relative after:content-[''] after:absolute after:w-full after:h-[2px] after:-bottom-[2px] after:left-0 after:bg-brand-red after:scale-x-0 after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left">Log in</Link>
         </div>
         
       </div>
