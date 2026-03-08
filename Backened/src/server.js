@@ -19,11 +19,13 @@ app.use(cors({
   origin: "http://localhost:5173",
   credentials: true
 }));
-const authRouter = require("./routes/UserAuth");
+const authRouter    = require("./routes/UserAuth");
 const productRouter = require("./routes/productAuth");
+const orderRouter   = require("./routes/orderAuth");
 
-app.use("/person", authRouter);
+app.use("/person",  authRouter);
 app.use("/product", productRouter);
+app.use("/order",   orderRouter);
 
 const startServer = async () => {
   try {

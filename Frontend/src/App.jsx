@@ -12,6 +12,9 @@ import AllProfiles from './pages/AllProfiles';
 import SuperAdminUpdateProfile from './pages/SuperAdminUpdateProfile';
 import MyProducts from './pages/MyProducts';
 import UpdateProduct from './pages/UpdateProduct';
+import MyOrders from './pages/MyOrders';
+import PlaceOrder from './pages/PlaceOrder';
+import AdminOrders from './pages/AdminOrders';
 
 // ProtectedAuthRoute ensures logged-in users cannot access Login/Signup pages
 const ProtectedAuthRoute = ({ children }) => {
@@ -101,6 +104,22 @@ export default function App() {
               <UpdateProduct />
             </AdminRoute>
           } 
+        />
+        <Route
+          path="/my-orders"
+          element={<MyOrders />}
+        />
+        <Route
+          path="/checkout"
+          element={<PlaceOrder />}
+        />
+        <Route
+          path="/admin/orders"
+          element={
+            <AdminRoute>
+              <AdminOrders />
+            </AdminRoute>
+          }
         />
         <Route 
           path="/superadmin/all-profiles" 

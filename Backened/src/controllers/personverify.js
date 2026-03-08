@@ -3,6 +3,18 @@ const Person = require("../models/person");
 const validateUser = require("../Utility/validate")
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const cloudinary = require("../config/cloudinary");
+
+// Helper to upload buffer to Cloudinary
+const uploadToCloudinary = (buffer, folder) => {
+    return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+            { folder, resource_type: "image" },
+            (error, result) => { if (error) reject(error); else resolve(result); }
+        );
+        stream.end(buffer);
+    });
+};
 
 const register = async (req, res) => {
     try {
@@ -83,6 +95,12 @@ const updateprofile = async (req,res)=>{
         
         if (role) {
             updateData.role = role;
+        }
+
+        // Handle optional avatar upload
+        if (req.file) {
+            const result = await uploadToCloudinary(req.file.buffer, "stoodomart/avatars");
+            updateData.avatar = result.secure_url;
         }
 
         const updateperson = await Person.findByIdAndUpdate(

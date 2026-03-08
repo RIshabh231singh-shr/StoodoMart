@@ -167,7 +167,7 @@ export default function UpdateProduct() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-200 ml-1">Price (₹) *</label>
+                    <label className="text-sm font-bold text-slate-200 ml-1">Price (Rs.) *</label>
                     <div className="relative">
                         <Tag className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 pointer-events-none" />
                         <input

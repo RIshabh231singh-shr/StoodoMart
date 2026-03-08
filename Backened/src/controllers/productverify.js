@@ -1,25 +1,51 @@
 const Product = require("../models/product");
+const cloudinary = require("../config/cloudinary");
 
-const CreateProduct = async (req,res) => {
+// Helper to upload a buffer to Cloudinary
+const uploadToCloudinary = (buffer) => {
+    return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+            { folder: "stoodomart/products", resource_type: "image" },
+            (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+            }
+        );
+        stream.end(buffer);
+    });
+};
+
+const CreateProduct = async (req, res) => {
     try {
-        const {name,price,description,image,category,stock} = req.body;
-        if(!name || !price || !description || !image || !category || !stock){
+        const { name, price, description, category, stock } = req.body;
+
+        if (!name || !price || !description || !category || !stock) {
             return res.status(400).json({ message: "All fields are required" });
         }
-        if(price < 0){
+        if (!req.file) {
+            return res.status(400).json({ message: "Product image is required" });
+        }
+        if (price < 0) {
             return res.status(400).json({ message: "Price cannot be negative" });
         }
-        if(stock < 0){
+        if (stock < 0) {
             return res.status(400).json({ message: "Stock cannot be negative" });
         }
-        
-        // Attach the user from the adminMiddleware
-        const productData = {
-            ...req.body,
-            createdBy: req.user._id
-        };
 
-        const product = await Product.create(productData);
+        // Upload image to Cloudinary
+        const uploadResult = await uploadToCloudinary(req.file.buffer);
+        const imageUrl = uploadResult.secure_url;
+
+        const product = await Product.create({
+            name,
+            price,
+            description,
+            category,
+            stock,
+            image: imageUrl,
+            createdBy: req.user._id,
+        });
+
         res.status(201).json({ message: "Product created successfully", product });
     } catch (error) {
         console.error("Error creating product:", error);

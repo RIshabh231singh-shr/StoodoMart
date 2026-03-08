@@ -11,8 +11,9 @@ const {
 const userMiddleware = require("../middlewares/usermiddleware");
 const adminMiddleware = require("../middlewares/adminmiddleware");
 const superMiddleware = require("../middlewares/superadminmiddleware");
+const upload = require("../middlewares/uploadMiddleware");
 
-ProductRouter.post("/createproduct",adminMiddleware,CreateProduct);
+ProductRouter.post("/createproduct", adminMiddleware, upload.single("image"), CreateProduct);
 ProductRouter.put("/updateproduct/:id",adminMiddleware,UpdateProduct);
 ProductRouter.delete("/deleteproduct/:id",adminMiddleware,DeleteProduct);
 ProductRouter.get("/getoneproduct/:id",userMiddleware,GetOneProduct);

@@ -115,7 +115,7 @@ export default function Header() {
                       <Link to="/profile" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-brand-teal transition-colors">
                         <User size={16} /> My Profile
                       </Link>
-                      <Link to="/orders" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-brand-teal transition-colors">
+                      <Link to="/my-orders" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-brand-teal transition-colors">
                         <Package size={16} /> My Orders
                       </Link>
                       <div className="h-px bg-slate-100 my-2 mx-4"></div>

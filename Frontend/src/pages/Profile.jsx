@@ -89,19 +89,32 @@ export default function Profile() {
           <span className="text-2xl font-extrabold text-white tracking-tight drop-shadow-md">Stoodo<span className="text-purple-400">Mart</span></span>
         </Link>
         <div className="flex gap-4">
+          {/* My Orders — visible to all logged-in users */}
+          <button
+            onClick={() => navigate('/my-orders')}
+            className="px-5 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:to-indigo-500 text-white font-extrabold rounded-xl transition-all shadow-[0_4px_15px_rgba(99,102,241,0.3)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.4)] hover:-translate-y-0.5 border border-indigo-400/50"
+          >
+            My Orders
+          </button>
           {(profileData.role === 'Admin' || profileData.role === 'SuperAdmin') && (
             <div className="flex gap-4">
               <button 
                 onClick={() => navigate('/add-product')}
-                className="px-5 py-2 bg-white/20 hover:bg-white/30 text-white font-bold rounded-xl transition-all border border-white/30 shadow-[0_4px_15px_rgba(0,0,0,0.1)] hover:-translate-y-0.5"
+                className="px-5 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:to-indigo-500 text-white font-extrabold rounded-xl transition-all shadow-[0_4px_15px_rgba(99,102,241,0.3)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.4)] hover:-translate-y-0.5 border border-indigo-400/50"
               >
                 Add Product
               </button>
               <button 
                 onClick={() => navigate('/my-products')}
-                className="px-5 py-2 bg-indigo-500/30 hover:bg-indigo-500/50 text-indigo-100 font-bold rounded-xl transition-all border border-indigo-400/50 shadow-[0_4px_15px_rgba(99,102,241,0.2)] hover:-translate-y-0.5"
+                className="px-5 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:to-indigo-500 text-white font-extrabold rounded-xl transition-all shadow-[0_4px_15px_rgba(99,102,241,0.3)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.4)] hover:-translate-y-0.5 border border-indigo-400/50"
               >
                 My Products
+              </button>
+              <button 
+                onClick={() => navigate('/admin/orders')}
+                className="px-5 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:to-indigo-500 text-white font-extrabold rounded-xl transition-all shadow-[0_4px_15px_rgba(99,102,241,0.3)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.4)] hover:-translate-y-0.5 border border-indigo-400/50"
+              >
+                All Orders
               </button>
             </div>
           )}
@@ -129,9 +142,13 @@ export default function Profile() {
           
           <div className="px-6 pb-8 flex flex-col items-center relative -mt-14">
             
-            {/* Circle Avatar displaying first letter */}
-            <div className="w-28 h-28 rounded-full border-4 border-white flex items-center justify-center shadow-xl mb-4 bg-gradient-to-br from-indigo-500 via-purple-500 to-indigo-600 text-white text-5xl font-black shrink-0 relative z-10 transform hover:scale-105 transition-transform duration-300">
-              {firstLetter}
+            {/* Circle Avatar — shows image if uploaded, else first letter */}
+            <div className="w-28 h-28 rounded-full border-4 border-white flex items-center justify-center shadow-xl mb-4 bg-gradient-to-br from-indigo-500 via-purple-500 to-indigo-600 shrink-0 relative z-10 transform hover:scale-105 transition-transform duration-300 overflow-hidden">
+              {profileData.avatar ? (
+                <img src={profileData.avatar} alt={profileData.firstname} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-white text-5xl font-black">{firstLetter}</span>
+              )}
             </div>
             
             <h1 className="text-3xl font-extrabold text-slate-900 mb-2 tracking-tight">
