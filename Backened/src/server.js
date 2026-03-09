@@ -8,6 +8,8 @@ const connectDB = require("./config/db");
 
 const redisClient = require("./config/redis");
 
+console.log("DB_URL from env:", process.env.DB_URL);
+
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
 
@@ -31,12 +33,14 @@ const startServer = async () => {
     await connectDB();
     // connect Redis second
     await redisClient.connect()
-    .then(()=> console.log("Redis connected"))
-    .catch((err) => console.log("Redis connection error:", err));
+      .then(() => console.log("Redis connected"))
+      .catch((err) => console.log("Redis connection error:", err));
 
     // start server last
-    app.listen(process.env.PORT, () => {
-      console.log(`Server running on port ${process.env.PORT}`);
+    const PORT = process.env.PORT || 8000;
+
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
     });
 
   } catch (error) {

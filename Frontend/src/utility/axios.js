@@ -19,11 +19,11 @@ axiosClient.interceptors.response.use(
       // Dispatch a sync action or standard literal to clear the store's state
       // This resets everything gracefully if the token is gone or expired
       store.dispatch({ type: "auth/logout/fulfilled" });
-      
+
       // Optionally route them to the home page, but only if they aren't already there
       const currentPath = window.location.pathname;
       if (currentPath !== "/" && currentPath !== "/login" && currentPath !== "/signup") {
-          window.location.href = "/";
+        window.location.href = "/";
       }
     }
     return Promise.reject(error);

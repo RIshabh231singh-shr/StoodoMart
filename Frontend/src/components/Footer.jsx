@@ -48,7 +48,7 @@ export default function Footer() {
           <div>
             <h3 className="text-white text-base font-bold mb-6 uppercase tracking-wider">Customer Service</h3>
             <ul className="flex flex-col gap-3 mb-6">
-              <li><Link to="/buy and sell" className="text-sm hover:text-brand-teal transition-colors">Can buy and sell your products within college</Link></li>
+              <li><Link to="/buy-and-sell" className="text-sm hover:text-brand-teal transition-colors">Can buy and sell your products within college</Link></li>
               <li><Link to="/returns" className="text-sm hover:text-brand-teal transition-colors">Returns & Exchanges</Link></li>
               <li><Link to="/privacy" className="text-sm hover:text-brand-teal transition-colors">Privacy Policy</Link></li>
               <li><Link to="/terms" className="text-sm hover:text-brand-teal transition-colors">Terms of Service</Link></li>

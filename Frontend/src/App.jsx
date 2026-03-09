@@ -14,6 +14,14 @@ import AllProfiles from './pages/AllProfiles';
 import SuperAdminUpdateProfile from './pages/SuperAdminUpdateProfile';
 import MyProducts from './pages/MyProducts';
 import UpdateProduct from './pages/UpdateProduct';
+import Shop from './pages/Shop';
+import Deals from './pages/Deals';
+import FAQ from './pages/FAQ';
+import Contact from './pages/Contact';
+import BuyAndSell from './pages/BuyAndSell';
+import Returns from './pages/Returns';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
 
 // ProtectedAuthRoute ensures logged-in users cannot access Login/Signup pages
 const ProtectedAuthRoute = ({ children }) => {
@@ -78,6 +86,14 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/shop" element={<Shop />} />
+        <Route path="/deals" element={<Deals />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/buy-and-sell" element={<BuyAndSell />} />
+        <Route path="/returns" element={<Returns />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
         <Route path="/about" element={<About />} />
         <Route path="/category/:slug" element={<CategoryPage />} />
         <Route path="/profile" element={<Profile />} />
