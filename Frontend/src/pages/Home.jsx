@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router';
 // Note: Replace these imports with your actual file paths
 import Header from '../components/Header';
 import HeroSection from '../components/HeroSection';
@@ -22,13 +23,13 @@ const CATEGORIES = [
   {
     id: 3,
     name: "Sports & Fitness",
-    slug: "sports & fitness",
+    slug: "sports-and-fitness",
     bgGradient: "from-emerald-500 to-teal-600"
   },
   {
     id: 4,
     name: "Hostel Essentials",
-    slug: "hostel essentials",
+    slug: "hostel-essentials",
     bgGradient: "from-orange-500 to-amber-600"
   },
 
@@ -74,8 +75,8 @@ export default function Home() {
  */
 function CategoryCard({ category }) {
   return (
-    <a
-      href={`/category/${category.slug}`}
+    <Link
+      to={`/category/${category.slug}`}
       className="group relative block h-72 w-full overflow-hidden rounded-3xl bg-slate-200 shadow-md hover:shadow-2xl transition-all duration-500 ease-out hover:-translate-y-2"
     >
       {/* Background Layer */}
@@ -97,6 +98,6 @@ function CategoryCard({ category }) {
           </span>
         </div>
       </div>
-    </a>
+    </Link>
   );
 }

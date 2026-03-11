@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Link } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
 import axiosClient from "../utility/axios";
 import { Search, Loader2, Package, ShoppingCart } from "lucide-react";
+import { selectCurrentCollege } from "../CollegeSlice";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import ProductCard from "../components/ProductCard";
 
 export default function Shop() {
   const [products, setProducts] = useState([]);
@@ -13,17 +16,33 @@ export default function Shop() {
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const location = useLocation();
+  const navigate = useNavigate();
+  const currentCollege = useSelector(selectCurrentCollege);
+
+  // Pre-fill search from header's URL query param (?q=...)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const q = params.get('q');
+    if (q) {
+      setSearchTerm(decodeURIComponent(q));
+      // Clean the URL so refreshing doesn't re-apply the old search
+      navigate('/shop', { replace: true });
+    }
+  }, []);  // only run once on mount
+
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
-      // Assuming GET /product/getallproduct supports page 
+      const fetchParams = { page };
+      if (currentCollege && currentCollege !== "Select College") {
+        fetchParams.college = currentCollege;
+      }
       const res = await axiosClient.get("/product/getallproduct", {
-        params: { page },
+        params: fetchParams,
       });
-      // The backend returns an object with `{ message: "...", allproduct: [...] }`
       setProducts(res.data.allproduct || []);
-      // If the backend doesn't return totalPages for this endpoint, default to 1 for now
       setTotalPages(res.data.totalPages || 1);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load products. Please check your connection.");
@@ -31,17 +50,18 @@ export default function Shop() {
     } finally {
       setLoading(false);
     }
-  }, [page]);
+  }, [page, currentCollege]);
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
 
-  // Client-side filtering as a fallback if the API doesn't support search
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Client-side filtering (Safely handled in case name/category is missing)
+  const filteredProducts = products.filter(product => {
+    const nameMatch = product?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    const categoryMatch = product?.category?.toLowerCase().includes(searchTerm.toLowerCase());
+    return nameMatch || categoryMatch;
+  });
 
   return (
     <div className="min-h-screen font-sans flex flex-col bg-slate-50 text-slate-900">
@@ -70,8 +90,8 @@ export default function Shop() {
             </div>
           </div>
 
-          {/* Error State */}
-          {error && (
+          {/* ----- STATE 1: ERROR ----- */}
+          {error && !loading && (
             <div className="mb-8 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg shadow-sm">
               <p className="text-red-700 font-medium">{error}</p>
               <button
@@ -83,8 +103,8 @@ export default function Shop() {
             </div>
           )}
 
-          {/* Loading State */}
-          {loading ? (
+          {/* ----- STATE 2: LOADING ----- */}
+          {loading && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {[...Array(8)].map((_, i) => (
                 <div key={i} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 animate-pulse">
@@ -101,8 +121,10 @@ export default function Shop() {
                 </div>
               ))}
             </div>
-          ) : filteredProducts.length === 0 && !error ? (
-            /* Empty State */
+          )}
+
+          {/* ----- STATE 3: EMPTY (No Products Found) ----- */}
+          {!loading && !error && filteredProducts.length === 0 && (
             <div className="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-sm">
               <Package className="mx-auto h-16 w-16 text-slate-300 mb-4" />
               <h3 className="text-xl font-bold text-slate-700 mb-2">No Products Found</h3>
@@ -120,8 +142,10 @@ export default function Shop() {
                 </button>
               )}
             </div>
-          ) : (
-            /* Products Grid */
+          )}
+
+          {/* ----- STATE 4: SHOW PRODUCTS ----- */}
+          {!loading && !error && filteredProducts.length > 0 && (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {filteredProducts.map((product) => (
@@ -160,75 +184,6 @@ export default function Shop() {
       </main>
 
       <Footer />
-    </div>
-  );
-}
-
-function ProductCard({ product }) {
-  return (
-    <div className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 flex flex-col h-full hover:-translate-y-1">
-      {/* Image Container */}
-      <div className="relative aspect-square overflow-hidden bg-slate-100">
-        {product.image ? (
-          <img
-            src={product.image}
-            alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            onError={(e) => {
-              // Fallback for broken images
-              e.target.src = "https://via.placeholder.com/400?text=No+Image";
-            }}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-slate-400">
-            <Package size={48} />
-          </div>
-        )}
-
-        {/* Out of Stock Overlay */}
-        {product.stock <= 0 && (
-          <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center">
-            <span className="bg-slate-900 text-white font-bold px-4 py-2 rounded-full tracking-wide shadow-lg">
-              Out of Stock
-            </span>
-          </div>
-        )}
-
-        {/* Category Badge */}
-        <div className="absolute top-3 left-3">
-          <span className="bg-white/90 backdrop-blur-sm text-xs font-bold px-3 py-1.5 rounded-full text-slate-700 shadow-sm border border-white">
-            {product.category}
-          </span>
-        </div>
-      </div>
-
-      {/* Content Container */}
-      <div className="p-5 flex flex-col flex-grow">
-        <h3 className="font-bold text-lg text-slate-900 mb-1 line-clamp-2 leading-snug group-hover:text-brand-teal transition-colors">
-          {product.name}
-        </h3>
-
-        <p className="text-slate-500 text-sm line-clamp-2 mb-4 flex-grow">
-          {product.description}
-        </p>
-
-        <div className="pt-4 border-t border-slate-100 flex items-center justify-between mt-auto">
-          <div className="flex flex-col">
-            <span className="text-xs text-slate-400 font-medium tracking-wide uppercase">Price</span>
-            <span className="text-xl font-black text-slate-900">
-              ₹{product.price.toLocaleString('en-IN')}
-            </span>
-          </div>
-
-          <button
-            disabled={product.stock <= 0}
-            className="h-10 w-10 rounded-xl bg-slate-900 text-white flex items-center justify-center hover:bg-brand-teal transition-colors disabled:opacity-50 disabled:hover:bg-slate-900 shadow-md hover:shadow-lg disabled:shadow-none"
-            title={product.stock > 0 ? "View Details" : "Out of Stock"}
-          >
-            <ShoppingCart size={18} />
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

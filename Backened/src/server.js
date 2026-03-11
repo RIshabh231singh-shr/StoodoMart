@@ -21,11 +21,19 @@ app.use(cors({
   origin: "http://localhost:5173",
   credentials: true
 }));
-const authRouter = require("./routes/UserAuth");
+const authRouter    = require("./routes/UserAuth");
 const productRouter = require("./routes/productAuth");
+const orderRouter   = require("./routes/orderAuth");
+const cartRouter    = require("./routes/cartAuth");
+const adminRequestRouter = require("./routes/adminRequestAuth");
+const newsletterRouter   = require("./routes/newsletterAuth");
 
-app.use("/person", authRouter);
+app.use("/person",  authRouter);
 app.use("/product", productRouter);
+app.use("/order",   orderRouter);
+app.use("/cart",    cartRouter);
+app.use("/admin-request", adminRequestRouter);
+app.use("/newsletter",    newsletterRouter);
 
 const startServer = async () => {
   try {

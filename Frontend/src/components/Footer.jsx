@@ -1,9 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router';
-import { Facebook, Twitter, Instagram, Youtube, Mail, MapPin, Phone } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Youtube, Mail, MapPin, Phone, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import logo from '../assets/logo.png';
+import axiosClient from '../utility/axios';
 
 export default function Footer() {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState('idle'); // 'idle' | 'loading' | 'success' | 'error'
+  const [message, setMessage] = useState('');
+
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setStatus('loading');
+    try {
+      const res = await axiosClient.post('/newsletter/subscribe', { email });
+      setStatus('success');
+      setMessage(res.data.message);
+      setEmail('');
+    } catch (err) {
+      setStatus('error');
+      setMessage(err.response?.data?.message || 'Something went wrong. Please try again.');
+    }
+  };
+
   return (
     <footer className="bg-slate-900 pt-16 pb-8 text-slate-300 relative overflow-hidden">
       {/* Background decorations */}
@@ -74,23 +94,44 @@ export default function Footer() {
           <div>
             <h3 className="text-white text-base font-bold mb-6 uppercase tracking-wider">Newsletter</h3>
             <p className="text-sm mb-4 text-slate-400">Subscribe to our newsletter to receive updates on new products and special offers.</p>
-            <form className="flex flex-col gap-3" onSubmit={(e) => e.preventDefault()}>
-              <input
-                type="email"
-                placeholder="Your email address"
-                className="bg-slate-800 border-none outline-none rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-brand-teal transition-all placeholder:text-slate-500"
-                required
-              />
-              <button
-                type="submit"
-                className="bg-gradient-to-r from-brand-teal to-brand-green text-white font-bold text-sm py-3 rounded-xl hover:shadow-[0_0_15px_rgba(0,229,255,0.4)] transition-all hover:-translate-y-0.5"
-              >
-                SUBSCRIBE
-              </button>
-            </form>
+
+            {status === 'success' ? (
+              <div className="flex items-start gap-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
+                <CheckCircle size={20} className="text-emerald-400 shrink-0 mt-0.5" />
+                <p className="text-emerald-300 text-sm font-medium">{message}</p>
+              </div>
+            ) : (
+              <form className="flex flex-col gap-3" onSubmit={handleSubscribe}>
+                <input
+                  type="email"
+                  placeholder="Your email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={status === 'loading'}
+                  className="bg-slate-800 border-none outline-none rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-brand-teal transition-all placeholder:text-slate-500 disabled:opacity-60"
+                />
+                {status === 'error' && (
+                  <div className="flex items-center gap-2 text-rose-400 text-xs font-medium">
+                    <AlertCircle size={14} />
+                    <span>{message}</span>
+                  </div>
+                )}
+                <button
+                  type="submit"
+                  disabled={status === 'loading' || !email.trim()}
+                  className="bg-gradient-to-r from-brand-teal to-brand-green text-white font-bold text-sm py-3 rounded-xl hover:shadow-[0_0_15px_rgba(0,229,255,0.4)] transition-all hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0 flex items-center justify-center gap-2"
+                >
+                  {status === 'loading' ? (
+                    <><Loader2 size={16} className="animate-spin" /> SUBSCRIBING...</>
+                  ) : 'SUBSCRIBE'}
+                </button>
+              </form>
+            )}
           </div>
 
         </div>
+
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">

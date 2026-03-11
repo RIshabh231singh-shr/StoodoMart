@@ -3,6 +3,19 @@ const Person = require("../models/person");
 const validateUser = require("../Utility/validate")
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const cloudinary = require("../config/cloudinary");
+
+
+// Helper to upload buffer to Cloudinary
+const uploadToCloudinary = (buffer, folder) => {
+    return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+            { folder, resource_type: "image" },
+            (error, result) => { if (error) reject(error); else resolve(result); }
+        );
+        stream.end(buffer);
+    });
+};
 
 const register = async (req, res) => {
     try {
@@ -11,7 +24,7 @@ const register = async (req, res) => {
             return res.status(400).json({ message: validation.message });
         }
 
-        const { firstname, lastname, email, password, role } = req.body;
+        const { firstname, lastname, email, password, role, college } = req.body;
 
         const existingPerson = await Person.findOne({ email });
         if (existingPerson) {
@@ -26,7 +39,8 @@ const register = async (req, res) => {
             lastname,
             email,
             password: hashedPassword,
-            role
+            role,
+            college
         });
         newPerson.password = undefined;
 
@@ -83,6 +97,12 @@ const updateprofile = async (req,res)=>{
         
         if (role) {
             updateData.role = role;
+        }
+
+        // Handle optional avatar upload
+        if (req.file) {
+            const uploadResult = await uploadToCloudinary(req.file.buffer, "stoodomart/avatars");
+            updateData.avatar = uploadResult.secure_url;
         }
 
         const updateperson = await Person.findByIdAndUpdate(

@@ -7,7 +7,7 @@ import { useSelector, useDispatch } from "react-redux";
 import axiosClient from "../utility/axios";
 import { CheckAuthThunk } from "../Authslice";
 import logo from "../assets/logo.png";
-import { Loader2, User, Mail, ShieldAlert } from "lucide-react";
+import { Loader2, User, Mail, ShieldAlert, Upload } from "lucide-react";
 
 // Matches backend validation setup but makes password optional for updates
 const updateSchemaBase = z.object({
@@ -21,6 +21,9 @@ export default function UpdateProfile() {
   const [apiError, setApiError] = useState("");
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [currentAvatar, setCurrentAvatar] = useState(null);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -56,6 +59,7 @@ export default function UpdateProfile() {
         setValue("lastname", profileData.lastname || "");
         setValue("email", profileData.email || "");
         setValue("role", profileData.role || "User");
+        setCurrentAvatar(profileData.avatar || null);
         setPageLoading(false);
       } catch (err) {
         console.error("Failed to load profile", err);
@@ -72,12 +76,20 @@ export default function UpdateProfile() {
     setApiError("");
 
     try {
-      // Clean up optional fields
-      const payload = { ...data };
-      // Only SuperAdmins can send role
-      if (user?.role !== "SuperAdmin") delete payload.role;
+      const formData = new FormData();
+      formData.append("firstname", data.firstname);
+      formData.append("lastname", data.lastname || "");
+      formData.append("email", data.email);
+      if (user?.role === "SuperAdmin" && data.role) {
+        formData.append("role", data.role);
+      }
+      if (avatarFile) {
+        formData.append("avatar", avatarFile);
+      }
 
-      await axiosClient.put(`/person/updateprofile/${user._id}`, payload);
+      await axiosClient.put(`/person/updateprofile/${user._id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       
       // Update global redux state silently behind the scenes
       dispatch(CheckAuthThunk());
@@ -134,8 +146,39 @@ export default function UpdateProfile() {
         ">
           <div className="p-8">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-extrabold text-white mb-2">Update Profile</h2>
-              <p className="text-slate-300">Modify your account information</p>
+              {/* Avatar Preview */}
+              <div className="relative inline-block mb-4">
+                <div className="w-24 h-24 rounded-full border-4 border-white/20 overflow-hidden mx-auto shadow-xl">
+                  {avatarPreview ? (
+                    <img src={avatarPreview} alt="New avatar" className="w-full h-full object-cover" />
+                  ) : currentAvatar ? (
+                    <img src={currentAvatar} alt="Current avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-3xl font-black">
+                      {user?.firstname?.charAt(0).toUpperCase() || "?"}
+                    </div>
+                  )}
+                </div>
+                {/* Upload button overlay */}
+                <label htmlFor="avatarInput" className="absolute -bottom-1 -right-1 w-8 h-8 bg-indigo-500 hover:bg-indigo-400 rounded-full flex items-center justify-center cursor-pointer border-2 border-white/20 shadow-md transition-all">
+                  <Upload size={14} className="text-white" />
+                  <input
+                    id="avatarInput"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        setAvatarFile(file);
+                        setAvatarPreview(URL.createObjectURL(file));
+                      }
+                    }}
+                  />
+                </label>
+              </div>
+              <h2 className="text-3xl font-extrabold text-white mb-1">Update Profile</h2>
+              <p className="text-slate-300 text-sm">{avatarFile ? "New photo selected" : "Click the camera icon to change photo"}</p>
             </div>
 
             {apiError && (

@@ -30,6 +30,15 @@ const personSchema = new mongoose.Schema({
         enum : ["User", "Admin","SuperAdmin"],
         default : "User",
     },
+    avatar: {
+        type: String,
+        default: null,
+    },
+    college: {
+        type: String,
+        trim: true,
+        default: null,
+    },
 },{timestamps:true});
 
 
