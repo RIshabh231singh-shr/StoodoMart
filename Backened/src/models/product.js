@@ -42,6 +42,16 @@ const productSchema = new Schema({
         type: String,
         required: true,
         trim: true,
+    },
+    usedFor: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    originalPrice: {
+        type: Number,
+        required: true,
+        min: 0,
     }
 },{
     timestamps: true,

@@ -273,6 +273,33 @@ const verifyAuth = async (req, res) => {
     }
 };
 
+const promoteToAdmin = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const person = await Person.findByIdAndUpdate(
+            userId,
+            { role: "Admin" },
+            { new: true, runValidators: true }
+        );
+
+        if (!person) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // We should also update the JWT token if role change needs to be reflected in token immediately
+        // However, for simplicity and since we update local state, let's just return the user
+        person.password = undefined;
+
+        res.status(200).json({
+            message: "User promoted to Admin successfully",
+            person: person
+        });
+    } catch (error) {
+        console.error("Error promoting user to Admin:", error);
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+};
+
 module.exports = {
-    register , updateprofile , deleteprofile , login , getOneProfile , getAllProfile , logout, verifyAuth
+    register, updateprofile, deleteprofile, login, getOneProfile, getAllProfile, logout, verifyAuth, promoteToAdmin
 };

@@ -8,6 +8,33 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import ProductCard from "../components/ProductCard";
 
+const CATEGORIES = [
+  {
+    id: 1,
+    name: "Electronics And Instruments",
+    slug: "electronics-and-instruments",
+    bgGradient: "from-blue-600 to-indigo-700"
+  },
+  {
+    id: 2,
+    name: "Stationary And Clothing",
+    slug: "stationary-and-clothing",
+    bgGradient: "from-rose-500 to-pink-600"
+  },
+  {
+    id: 3,
+    name: "Sports & Fitness",
+    slug: "sports-and-fitness",
+    bgGradient: "from-emerald-500 to-teal-600"
+  },
+  {
+    id: 4,
+    name: "Hostel Essentials",
+    slug: "hostel-essentials",
+    bgGradient: "from-orange-500 to-amber-600"
+  }
+];
+
 export default function Shop() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,6 +42,7 @@ export default function Shop() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -36,13 +64,20 @@ export default function Shop() {
     setError("");
     try {
       const fetchParams = { page };
+      
       if (currentCollege && currentCollege !== "Select College") {
         fetchParams.college = currentCollege;
       }
-      const res = await axiosClient.get("/product/getallproduct", {
-        params: fetchParams,
-      });
-      setProducts(res.data.allproduct || []);
+
+      let res;
+      if (selectedCategory === "All") {
+        res = await axiosClient.get("/product/getallproduct", { params: fetchParams });
+        setProducts(res.data.allproduct || []);
+      } else {
+        res = await axiosClient.get(`/product/category/${selectedCategory}`, { params: fetchParams });
+        setProducts(res.data.products || []);
+      }
+      
       setTotalPages(res.data.totalPages || 1);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load products. Please check your connection.");
@@ -50,7 +85,7 @@ export default function Shop() {
     } finally {
       setLoading(false);
     }
-  }, [page, currentCollege]);
+  }, [page, currentCollege, selectedCategory]);
 
   useEffect(() => {
     fetchProducts();
@@ -87,6 +122,84 @@ export default function Shop() {
                 className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent shadow-sm transition-all"
               />
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            </div>
+          </div>
+
+          {/* Categories Grid (Consolidated from Categories Page) */}
+          <section className="mb-20">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-black tracking-tight text-slate-800">Browse by Category</h2>
+              <div className="h-0.5 flex-grow mx-6 bg-slate-100 hidden md:block"></div>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {CATEGORIES.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => {
+                    setSelectedCategory(category.slug);
+                    setPage(1);
+                    document.getElementById('products-grid-section')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className={`group relative block h-48 overflow-hidden rounded-3xl bg-slate-200 shadow-sm hover:shadow-xl transition-all duration-500 ease-out hover:-translate-y-1 ${
+                    selectedCategory === category.slug ? 'ring-4 ring-brand-teal ring-offset-4' : ''
+                  }`}
+                >
+                  <div className={`absolute inset-0 bg-gradient-to-br ${category.bgGradient} transition-transform duration-700 group-hover:scale-110`} />
+                  <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors duration-300" />
+                  <div className="absolute inset-0 flex items-center justify-center p-6 text-center">
+                    <h3 className="text-white text-lg font-bold tracking-wide drop-shadow-md transition-transform duration-300 group-hover:scale-105 whitespace-pre-line">
+                      {category.name.replace(" And ", " And\n")}
+                    </h3>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <div id="products-grid-section" className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+            <div className="flex items-center gap-4">
+               <h2 className="text-2xl font-black tracking-tight text-slate-800">
+                {selectedCategory === "All" ? "All Products" : CATEGORIES.find(c => c.slug === selectedCategory)?.name}
+              </h2>
+              {selectedCategory !== "All" && (
+                <button 
+                  onClick={() => {
+                    setSelectedCategory("All");
+                    setPage(1);
+                  }}
+                  className="text-xs font-bold text-brand-teal hover:underline"
+                >
+                  Clear Filter
+                </button>
+              )}
+            </div>
+            
+            {/* Filter Chips */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+              <button
+                onClick={() => { setSelectedCategory("All"); setPage(1); }}
+                className={`px-4 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
+                  selectedCategory === "All" 
+                  ? 'bg-slate-900 text-white shadow-md' 
+                  : 'bg-white text-slate-600 border border-slate-200 hover:border-brand-teal hover:text-brand-teal'
+                }`}
+              >
+                All
+              </button>
+              {CATEGORIES.map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => { setSelectedCategory(cat.slug); setPage(1); }}
+                  className={`px-4 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
+                    selectedCategory === cat.slug 
+                    ? 'bg-brand-teal text-slate-900 shadow-md' 
+                    : 'bg-white text-slate-600 border border-slate-200 hover:border-brand-teal hover:text-brand-teal'
+                  }`}
+                >
+                  {cat.name.split(' ')[0]} {/* Short name for mobile */}
+                </button>
+              ))}
             </div>
           </div>
 

@@ -14,6 +14,8 @@ const productSchema = z.object({
   category: z.enum(["Electronics", "Instrument", "Stationary", "Other"], { errorMap: () => ({ message: "Please select a valid category" }) }),
   stock: z.coerce.number().min(0, "Stock cannot be negative").int("Stock must be a whole number"),
   college: z.string().min(1, "Please select the campus where this product is available"),
+  usedFor: z.string().min(1, "Please mention how long you have used this product"),
+  originalPrice: z.coerce.number().min(0, "Original price cannot be negative"),
 });
 
 export default function AddProduct() {
@@ -38,6 +40,8 @@ export default function AddProduct() {
       category: "",
       stock: "",
       college: "",
+      usedFor: "",
+      originalPrice: "",
     },
   });
 
@@ -78,6 +82,8 @@ export default function AddProduct() {
       formData.append("category", data.category);
       formData.append("stock", data.stock);
       formData.append("college", data.college);
+      formData.append("usedFor", data.usedFor);
+      formData.append("originalPrice", data.originalPrice);
       formData.append("image", imageFile);
 
       const response = await axiosClient.post("/product/createproduct", formData, {
@@ -165,6 +171,30 @@ export default function AddProduct() {
                       placeholder="e.g. 50" />
                   </div>
                   {errors.stock && <p className="text-red-500 text-xs ml-1 font-medium">{errors.stock.message}</p>}
+                </div>
+              </div>
+
+              {/* Usage Duration + Original Price */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 ml-1">Used For (Duration) *</label>
+                  <div className="relative">
+                    <FileText className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 pointer-events-none" />
+                    <input type="text" {...register("usedFor")}
+                      className="w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all shadow-sm"
+                      placeholder="e.g. 6 Months / 1 Year" />
+                  </div>
+                  {errors.usedFor && <p className="text-red-500 text-xs ml-1 font-medium">{errors.usedFor.message}</p>}
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 ml-1">Original Price (Bought at) *</label>
+                  <div className="relative">
+                    <Tag className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 pointer-events-none" />
+                    <input type="number" step="0.01" {...register("originalPrice")}
+                      className="w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all shadow-sm"
+                      placeholder="Price you paid" />
+                  </div>
+                  {errors.originalPrice && <p className="text-red-500 text-xs ml-1 font-medium">{errors.originalPrice.message}</p>}
                 </div>
               </div>
 

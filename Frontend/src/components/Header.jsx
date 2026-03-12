@@ -61,6 +61,19 @@ export default function Header() {
     dispatch(setSelectedCollege(e.target.value));
   };
 
+  const handleSellItem = async () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    if (user?.role === 'Admin' || user?.role === 'SuperAdmin') {
+      navigate('/add-product');
+    } else {
+      navigate('/buy-and-sell');
+    }
+  };
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full ${isScrolled ? 'bg-white/90 backdrop-blur-md shadow-md py-3' : 'bg-transparent py-5'
@@ -80,10 +93,12 @@ export default function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             <Link to="/shop" className="text-slate-700 font-semibold hover:text-brand-teal transition-colors duration-200">Shop</Link>
-            <Link to="/categories" className="text-slate-700 font-semibold hover:text-brand-teal transition-colors duration-200">Categories</Link>
-            <Link to="/deals" className="text-brand-red font-bold flex items-center gap-1 hover:text-brand-orange transition-colors duration-200">
-              <span className="animate-pulse">🔥</span> Hot Deals
-            </Link>
+            <button 
+              onClick={handleSellItem}
+              className="text-brand-teal font-bold flex items-center gap-1 hover:text-brand-orange transition-colors duration-200"
+            >
+              Sell Item
+            </button>
           </nav>
 
           {/* Search, Action Icons & Auth */}
@@ -223,8 +238,15 @@ export default function Header() {
             <input type="text" placeholder="Search products..." className="bg-transparent border-none outline-none text-sm w-full" />
           </div>
           <Link to="/shop" className="text-lg font-semibold text-slate-700 py-2 border-b border-slate-100">Shop</Link>
-          <Link to="/categories" className="text-lg font-semibold text-slate-700 py-2 border-b border-slate-100">Categories</Link>
-          <Link to="/deals" className="text-lg font-bold text-brand-red py-2 border-b border-slate-100">Hot Deals</Link>
+          <button 
+            onClick={() => {
+              setMobileMenuOpen(false);
+              handleSellItem();
+            }}
+            className="text-lg font-bold text-brand-teal py-2 border-b border-slate-100 text-left"
+          >
+            Sell Item
+          </button>
 
           <div className="flex flex-col gap-3 mt-4">
             {isAuthenticated ? (

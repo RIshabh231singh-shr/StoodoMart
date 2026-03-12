@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { Link } from "react-router";
+import React, { useState, useEffect } from "react";
+
+import { Link, useNavigate } from "react-router";
 import { useSelector } from "react-redux";
 import { BookOpen, Camera, Smartphone, Package, ShieldCheck, Zap, Handshake, ArrowRight } from "lucide-react";
 import Header from "../components/Header";
@@ -7,6 +8,25 @@ import Footer from "../components/Footer";
 import axiosClient from "../utility/axios";
 
 export default function BuyAndSell() {
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
+
+  const handleStartSelling = () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    if (user?.role === 'Admin' || user?.role === 'SuperAdmin') {
+      navigate('/add-product');
+    } else {
+      const section = document.getElementById('seller-request-section');
+      if (section) {
+        section.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen font-sans flex flex-col bg-slate-50 text-slate-900">
       <Header />
@@ -31,12 +51,12 @@ export default function BuyAndSell() {
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                <Link
-                  to="/add-product"
+                <button
+                  onClick={handleStartSelling}
                   className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-brand-teal to-brand-green hover:from-emerald-400 hover:to-emerald-500 text-slate-900 font-black rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(0,229,255,0.3)] hover:shadow-[0_0_30px_rgba(0,229,255,0.5)] transform hover:-translate-y-1 flex items-center justify-center gap-2 text-lg"
                 >
                   Start Selling Now <ArrowRight size={20} />
-                </Link>
+                </button>
                 <Link
                   to="/shop"
                   className="w-full sm:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-lg"
@@ -121,10 +141,10 @@ export default function BuyAndSell() {
         </section>
 
         {/* Sell Request Section */}
-        <section className="container mx-auto px-4 md:px-8 max-w-4xl mb-12">
+        <section id="seller-request-section" className="container mx-auto px-4 md:px-8 max-w-4xl mb-12">
           <div className="bg-white rounded-3xl p-8 md:p-12 border border-slate-200 shadow-xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-brand-teal/5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
-            
+
             <div className="relative z-10">
               <div className="text-center mb-10">
                 <h2 className="text-3xl font-black mb-4 tracking-tight text-slate-800">
@@ -151,79 +171,161 @@ export default function BuyAndSell() {
 function AdminRequestForm() {
   const [reason, setReason] = useState('');
   const [loading, setLoading] = useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(true);
+  const [myRequest, setMyRequest] = useState(null);
   const [message, setMessage] = useState({ type: '', text: '' });
-  
+
   const { isAuthenticated, user } = useSelector((state) => state.auth);
+
+  const fetchStatus = async () => {
+    if (!isAuthenticated) {
+      setCheckingStatus(false);
+      return;
+    }
+    try {
+      const res = await axiosClient.get('/admin-request/my-status');
+      if (res.data.request) {
+        setMyRequest(res.data.request);
+      }
+    } catch (err) {
+      console.error("Failed to fetch status:", err);
+    } finally {
+      setCheckingStatus(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStatus();
+  }, [isAuthenticated]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
-        setMessage({ type: 'error', text: 'You must be logged in to become a seller.' });
-        return;
+      setMessage({ type: 'error', text: 'You must be logged in to become a seller.' });
+      return;
     }
-    
+
     setLoading(true);
     setMessage({ type: '', text: '' });
-    
+
     try {
-        const res = await axiosClient.post('/admin-request/create', { reason });
-        setMessage({ type: 'success', text: res.data.message });
-        setReason('');
+      const res = await axiosClient.post('/admin-request/create', { reason });
+      setMessage({ type: 'success', text: res.data.message });
+      setReason('');
+      // Refresh status after successful submission
+      fetchStatus();
     } catch (err) {
-        setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to submit request.' });
+      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to submit request.' });
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 
+  if (checkingStatus) {
+    return (
+      <div className="flex justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-teal"></div>
+      </div>
+    );
+  }
+
   if (user?.role === 'Admin' || user?.role === 'SuperAdmin') {
-      return (
-          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center">
-              <ShieldCheck className="mx-auto h-12 w-12 text-emerald-500 mb-2" />
-              <h3 className="font-bold text-emerald-800 text-lg">You are already an approved Seller!</h3>
-              <p className="text-emerald-600 mt-2">Head over to your dashboard to start listing products.</p>
-              <Link to="/add-product" className="inline-block mt-4 px-6 py-2 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 transition-colors">
-                  Add a Product
-              </Link>
-          </div>
-      );
+    return (
+      <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-3xl p-10 text-center shadow-inner">
+        <div className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center text-white mx-auto mb-6 shadow-lg shadow-emerald-200">
+          <ShieldCheck size={40} />
+        </div>
+        <h3 className="font-black text-slate-800 text-2xl mb-3">You are an Approved Seller!</h3>
+        <p className="text-slate-600 text-lg mb-8 max-w-md mx-auto">Your account is fully verified. You can now start listing your products and connecting with buyers on campus.</p>
+        <Link to="/add-product" className="inline-flex items-center gap-2 px-10 py-4 bg-slate-900 text-white font-black rounded-2xl hover:bg-brand-teal transition-all duration-300 transform hover:-translate-y-1 shadow-xl">
+          Add Your First Product <ArrowRight size={20} />
+        </Link>
+      </div>
+    );
+  }
+
+  if (myRequest && myRequest.status === 'Pending') {
+    return (
+      <div className="bg-amber-50 border border-amber-200 rounded-3xl p-10 text-center shadow-inner">
+        <div className="w-20 h-20 bg-amber-400 rounded-full flex items-center justify-center text-white mx-auto mb-6 shadow-lg shadow-amber-200 animate-pulse">
+          <Zap size={40} />
+        </div>
+        <h3 className="font-black text-slate-800 text-2xl mb-3">Request Under Review</h3>
+        <p className="text-slate-600 text-lg mb-4">We've received your request to become a seller. Our team is currently reviewing your details.</p>
+        <div className="inline-block px-6 py-2 bg-amber-100 text-amber-800 font-bold rounded-full text-sm border border-amber-200">
+          Current Status: Pending Approval
+        </div>
+        <p className="text-slate-400 text-sm mt-8">Usually approved within 24 hours.</p>
+      </div>
+    );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto">
-      {message.text && (
-        <div className={`mb-6 p-4 rounded-xl border ${message.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-50 border-rose-200 text-rose-700'}`}>
-          {message.text}
+    <div className="max-w-2xl mx-auto">
+      {myRequest && myRequest.status === 'Rejected' && (
+        <div className="mb-10 p-6 bg-rose-50 border-2 border-rose-200 rounded-3xl text-rose-800 shadow-sm">
+          <div className="flex items-start gap-4">
+            <div className="bg-rose-100 p-2 rounded-lg">
+              <ShieldCheck className="text-rose-600" size={24} />
+            </div>
+            <div>
+              <h4 className="font-black text-lg mb-1">Previous Request Not Approved</h4>
+              <p className="text-rose-700/80 mb-3">Your request was reviewed but unfortunately could not be approved at this time.</p>
+              {myRequest.adminNote && (
+                <div className="bg-white/50 p-4 rounded-xl border border-rose-100 text-sm italic mb-3">
+                  " {myRequest.adminNote} "
+                </div>
+              )}
+              <p className="text-sm font-bold">Feel free to update your reason and try again!</p>
+            </div>
+          </div>
         </div>
       )}
-      
-      <div className="mb-6">
-        <label htmlFor="reason" className="block text-sm font-bold text-slate-700 mb-2">
-          Why do you want to become a seller? (Minimum 10 characters)
-        </label>
-        <textarea
-          id="reason"
-          rows="4"
-          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-teal focus:border-transparent outline-none transition-all resize-none"
-          placeholder="I have some old textbooks and electronics from last semester that I'd like to sell to juniors..."
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-          required
-          minLength={10}
-        ></textarea>
-      </div>
-      
-      <button
-        type="submit"
-        disabled={loading || reason.length < 10}
-        className="w-full py-4 bg-slate-900 hover:bg-brand-teal text-white font-bold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-      >
-        {loading ? (
-           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-        ) : (
-           <>Submit Request to Admin <ArrowRight size={18} /></>
+
+      <form onSubmit={handleSubmit} className="relative">
+        {message.text && (
+          <div className={`mb-8 p-5 rounded-2xl border-2 flex items-center gap-3 animate-slide-in ${message.type === 'success'
+            ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+            : 'bg-rose-50 border-rose-200 text-rose-700'
+            }`}>
+            {message.type === 'success' ? <ShieldCheck size={24} /> : <Zap size={24} />}
+            <span className="font-bold">{message.text}</span>
+          </div>
         )}
-      </button>
-    </form>
+
+        <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 mb-6 focus-within:ring-2 focus-within:ring-brand-teal/20 focus-within:border-brand-teal transition-all">
+          <label htmlFor="reason" className="block text-lg font-black text-slate-800 mb-4">
+            Why do you want to sell on StoodoMart?
+          </label>
+          <textarea
+            id="reason"
+            rows="5"
+            className="w-full bg-transparent border-none outline-none text-slate-700 placeholder:text-slate-400 text-lg resize-none"
+            placeholder="I have some old textbooks and electronics from last semester that I'd like to sell to help my juniors..."
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            required
+            minLength={10}
+          ></textarea>
+          <div className="flex justify-between items-center mt-4">
+            <span className={`text-xs font-bold ${reason.length < 10 ? 'text-slate-400' : 'text-brand-teal'}`}>
+              {reason.length}/10 characters min
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading || reason.length < 10}
+          className="w-full py-5 bg-slate-900 hover:bg-brand-teal text-white font-black rounded-2xl transition-all duration-300 shadow-xl hover:shadow-brand-teal/20 transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg"
+        >
+          {loading ? (
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+          ) : (
+            <>Apply to Become a Seller <ArrowRight size={22} /></>
+          )}
+        </button>
+      </form>
+    </div>
   );
 }

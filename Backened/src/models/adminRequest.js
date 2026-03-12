@@ -18,6 +18,11 @@ const adminRequestSchema = new Schema({
         type: String,
         enum: ["Pending", "Approved", "Rejected"],
         default: "Pending",
+    },
+    adminNote: {
+        type: String,
+        trim: true,
+        maxLength: 500,
     }
 }, {
     timestamps: true,

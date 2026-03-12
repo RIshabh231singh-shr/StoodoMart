@@ -108,8 +108,8 @@ export default function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/about" element={<About />} />
-        <Route path="/categories" element={<Categories />} />
-        <Route path="/category/:slug" element={<CategoryPage />} />
+        <Route path="/categories" element={<Navigate to="/shop" replace />} />
+        <Route path="/category/:slug" element={<Navigate to="/shop" replace />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/update-profile" element={<UpdateProfile />} />
         <Route

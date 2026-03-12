@@ -17,9 +17,9 @@ const uploadToCloudinary = (buffer) => {
 
 const CreateProduct = async (req, res) => {
     try {
-        const { name, price, description, category, stock, college } = req.body;
+        const { name, price, description, category, stock, college, usedFor, originalPrice } = req.body;
 
-        if (!name || !price || !description || !category || !stock || !college) {
+        if (!name || !price || !description || !category || !stock || !college || !usedFor || !originalPrice) {
             return res.status(400).json({ message: "All fields are required" });
         }
         if (!req.file) {
@@ -43,6 +43,8 @@ const CreateProduct = async (req, res) => {
             category,
             stock,
             college,
+            usedFor,
+            originalPrice,
             image: imageUrl,
             createdBy: req.user._id,
         });
@@ -57,8 +59,8 @@ const CreateProduct = async (req, res) => {
 const UpdateProduct = async (req,res)=>{
     try{
         const {id} = req.params;
-        const {name,price,description,image,category,stock} = req.body;
-        if(!name || !price || !description || !image || !category || !stock){
+        const {name,price,description,image,category,stock, usedFor, originalPrice} = req.body;
+        if(!name || !price || !description || !image || !category || !stock || !usedFor || !originalPrice){
             return res.status(400).json({ message: "All fields are required" });
         }
         if(price < 0){
@@ -114,18 +116,35 @@ const GetOneProduct = async (req,res)=>{
 
 const GetAllProduct = async (req,res)=>{
     try{
-        let {page, college} = req.query;
+        let {page, college, minPrice, maxPrice, sort} = req.query;
         page = parseInt(page) || 1;
-        limit = 10;
+        const limit = 10;
         const skip = (page - 1) * limit;
 
-        // Build search query based on college if provided
+        // Build search query
         const query = {};
         if (college) {
             query.college = college;
         }
 
-        const allproduct = await Product.find(query).skip(skip).limit(limit);
+        // Price Filtering
+        if (minPrice || maxPrice) {
+            query.price = {};
+            if (minPrice) query.price.$gte = Number(minPrice);
+            if (maxPrice) query.price.$lte = Number(maxPrice);
+        }
+
+        // Sorting
+        let sortOption = { createdAt: -1 }; // Default: Newest
+        if (sort === "price_asc") sortOption = { price: 1 };
+        else if (sort === "price_desc") sortOption = { price: -1 };
+        else if (sort === "newest") sortOption = { createdAt: -1 };
+
+        const allproduct = await Product.find(query)
+            .sort(sortOption)
+            .skip(skip)
+            .limit(limit);
+            
         const totalProducts = await Product.countDocuments(query);
         const totalPages = Math.ceil(totalProducts / limit);
 
@@ -175,7 +194,7 @@ const GetMyProducts = async (req, res) => {
 const GetProductsByCategory = async (req, res) => {
     try {
         const { slug } = req.params;
-        let { page, college } = req.query;
+        let { page, college, minPrice, maxPrice, sort } = req.query;
         
         page = parseInt(page) || 1;
         const limit = 10;
@@ -185,8 +204,7 @@ const GetProductsByCategory = async (req, res) => {
         let mappedCategories = [];
         let categoryName = decodedSlug;
 
-        // Map the frontend slugs directly to the allowed Product schema enums: 
-        // ["Electronics","Instrument","Stationary", "Other"]
+        // Map the frontend slugs directly to the allowed Product schema enums
         if (decodedSlug === 'electronics-and-instruments') {
             mappedCategories = ['Electronics', 'Instrument'];
             categoryName = "Electronics And Instruments";
@@ -200,7 +218,6 @@ const GetProductsByCategory = async (req, res) => {
             mappedCategories = ['Other'];
             categoryName = "Hostel Essentials";
         } else {
-            // Fallback for direct enum access if they somehow pass exactly "Electronics"
             const fallbackMap = {
                 'electronics': 'Electronics',
                 'instrument': 'Instrument',
@@ -213,12 +230,25 @@ const GetProductsByCategory = async (req, res) => {
 
         const query = { category: { $in: mappedCategories } };
         
-        // Add college filter if provided
         if (college) {
             query.college = college;
         }
 
+        // Price Filtering
+        if (minPrice || maxPrice) {
+            query.price = {};
+            if (minPrice) query.price.$gte = Number(minPrice);
+            if (maxPrice) query.price.$lte = Number(maxPrice);
+        }
+
+        // Sorting
+        let sortOption = { createdAt: -1 };
+        if (sort === "price_asc") sortOption = { price: 1 };
+        else if (sort === "price_desc") sortOption = { price: -1 };
+        else if (sort === "newest") sortOption = { createdAt: -1 };
+
         const products = await Product.find(query)
+            .sort(sortOption)
             .skip(skip)
             .limit(limit);
 

@@ -28,8 +28,17 @@ export default function AdminRequests() {
   };
 
   const handleUpdateStatus = async (requestId, newStatus) => {
+    let adminNote = '';
+    if (newStatus === 'Rejected') {
+      adminNote = window.prompt("Please provide a reason for rejection (optional):");
+      if (adminNote === null) return; // User cancelled prompt
+    }
+
     try {
-      await axiosClient.put(`/admin-request/admin/${requestId}/status`, { status: newStatus });
+      await axiosClient.put(`/admin-request/admin/${requestId}/status`, { 
+        status: newStatus,
+        adminNote: adminNote 
+      });
       // Remove or refresh the request list
       fetchRequests(activeTab);
     } catch (err) {
@@ -89,10 +98,10 @@ export default function AdminRequests() {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="text-lg font-bold">
-                      {request.userId.firstname} {request.userId.lastname}
+                      {request.userId?.firstname} {request.userId?.lastname}
                     </h3>
                     <span className="text-sm px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-medium">
-                      {request.userId.email}
+                      {request.userId?.email}
                     </span>
                     {request.status === 'Pending' && <span className="flex items-center gap-1 text-xs font-bold px-2 py-1 rounded bg-amber-100 text-amber-700"><Clock size={12} /> Pending</span>}
                     {request.status === 'Approved' && <span className="flex items-center gap-1 text-xs font-bold px-2 py-1 rounded bg-emerald-100 text-emerald-700"><CheckCircle size={12} /> Approved</span>}
@@ -103,6 +112,14 @@ export default function AdminRequests() {
                     <p className="text-sm font-semibold text-slate-500 mb-1">Reason for Request:</p>
                     <p>{request.reason}</p>
                   </div>
+
+                  {request.adminNote && (
+                    <div className="bg-brand-teal/5 p-4 rounded-xl border border-brand-teal/10 text-slate-700 mb-2">
+                      <p className="text-sm font-semibold text-brand-teal mb-1">Admin Feedback:</p>
+                      <p className="italic text-slate-600">" {request.adminNote} "</p>
+                    </div>
+                  )}
+
                   <p className="text-xs text-slate-400">Requested on: {new Date(request.createdAt).toLocaleDateString()}</p>
                 </div>
 

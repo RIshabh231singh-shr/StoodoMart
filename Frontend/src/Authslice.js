@@ -38,6 +38,15 @@ export const LogoutUserThunk = createAsyncThunk("auth/logout", async (_, { rejec
     }
 });
 
+export const PromoteUserThunk = createAsyncThunk("auth/promote", async (_, { rejectWithValue }) => {
+    try {
+        const response = await axiosClient.post("/person/promote");
+        return response.data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data?.message || "Promotion failed");
+    }
+});
+
 const authSlice = createSlice({
     name:"auth",
     initialState:{
@@ -98,6 +107,10 @@ const authSlice = createSlice({
             state.user = null;
             state.isAuthenticated = false;
             state.error = null;
+        })
+        //for promote
+        .addCase(PromoteUserThunk.fulfilled, (state, action) => {
+            state.user = action.payload.person;
         });
     }
 });

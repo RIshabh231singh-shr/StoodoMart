@@ -74,7 +74,7 @@ const getAllAdminRequests = async (req, res) => {
 const updateAdminRequestStatus = async (req, res) => {
     try {
         const { requestId } = req.params;
-        const { status } = req.body;
+        const { status, adminNote } = req.body;
 
         if (!["Approved", "Rejected"].includes(status)) {
             return res.status(400).json({ message: "Invalid status update. Must be Approved or Rejected." });
@@ -90,6 +90,9 @@ const updateAdminRequestStatus = async (req, res) => {
         }
 
         request.status = status;
+        if (adminNote) {
+            request.adminNote = adminNote;
+        }
         await request.save();
 
         // If approved, update the User's role to Admin
@@ -104,8 +107,29 @@ const updateAdminRequestStatus = async (req, res) => {
     }
 };
 
+const getMyRequestStatus = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const request = await AdminRequest.findOne({ userId })
+            .sort({ createdAt: -1 });
+
+        if (!request) {
+            return res.status(200).json({ status: "None" });
+        }
+
+        res.status(200).json({ 
+            message: "Request status fetched successfully", 
+            request 
+        });
+    } catch (error) {
+        console.error("Error fetching my request status:", error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     createAdminRequest,
     getAllAdminRequests,
-    updateAdminRequestStatus
+    updateAdminRequestStatus,
+    getMyRequestStatus
 };
