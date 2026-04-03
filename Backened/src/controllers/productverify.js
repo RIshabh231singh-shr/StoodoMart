@@ -17,9 +17,9 @@ const uploadToCloudinary = (buffer) => {
 
 const CreateProduct = async (req, res) => {
     try {
-        const { name, price, description, category, stock } = req.body;
+        const { name, price, description, category, stock, college, usedFor, originalPrice } = req.body;
 
-        if (!name || !price || !description || !category || !stock) {
+        if (!name || !price || !description || !category || !stock || !college || !usedFor || !originalPrice) {
             return res.status(400).json({ message: "All fields are required" });
         }
         if (!req.file) {
@@ -42,6 +42,9 @@ const CreateProduct = async (req, res) => {
             description,
             category,
             stock,
+            college,
+            usedFor,
+            originalPrice,
             image: imageUrl,
             createdBy: req.user._id,
         });
@@ -56,8 +59,8 @@ const CreateProduct = async (req, res) => {
 const UpdateProduct = async (req,res)=>{
     try{
         const {id} = req.params;
-        const {name,price,description,image,category,stock} = req.body;
-        if(!name || !price || !description || !image || !category || !stock){
+        const {name,price,description,image,category,stock, usedFor, originalPrice} = req.body;
+        if(!name || !price || !description || !image || !category || !stock || !usedFor || !originalPrice){
             return res.status(400).json({ message: "All fields are required" });
         }
         if(price < 0){
@@ -113,12 +116,44 @@ const GetOneProduct = async (req,res)=>{
 
 const GetAllProduct = async (req,res)=>{
     try{
-        let {page} = req.query;
+        let {page, college, minPrice, maxPrice, sort} = req.query;
         page = parseInt(page) || 1;
-        limit = 10;
+        const limit = 10;
         const skip = (page - 1) * limit;
-        const allproduct = await Product.find().skip(skip).limit(limit);
-        res.status(200).json({ message: "All products found successfully", allproduct });
+
+        // Build search query
+        const query = {};
+        if (college) {
+            query.college = college;
+        }
+
+        // Price Filtering
+        if (minPrice || maxPrice) {
+            query.price = {};
+            if (minPrice) query.price.$gte = Number(minPrice);
+            if (maxPrice) query.price.$lte = Number(maxPrice);
+        }
+
+        // Sorting
+        let sortOption = { createdAt: -1 }; // Default: Newest
+        if (sort === "price_asc") sortOption = { price: 1 };
+        else if (sort === "price_desc") sortOption = { price: -1 };
+        else if (sort === "newest") sortOption = { createdAt: -1 };
+
+        const allproduct = await Product.find(query)
+            .sort(sortOption)
+            .skip(skip)
+            .limit(limit);
+            
+        const totalProducts = await Product.countDocuments(query);
+        const totalPages = Math.ceil(totalProducts / limit);
+
+        res.status(200).json({ 
+            message: "All products found successfully", 
+            allproduct,
+            totalPages,
+            currentPage: page
+        });
     }
     catch(error){
         console.error("Error finding products:", error);
@@ -156,11 +191,90 @@ const GetMyProducts = async (req, res) => {
     }
 }
 
+const GetProductsByCategory = async (req, res) => {
+    try {
+        const { slug } = req.params;
+        let { page, college, minPrice, maxPrice, sort } = req.query;
+        
+        page = parseInt(page) || 1;
+        const limit = 10;
+        const skip = (page - 1) * limit;
+
+        const decodedSlug = decodeURIComponent(slug).toLowerCase();
+        let mappedCategories = [];
+        let categoryName = decodedSlug;
+
+        // Map the frontend slugs directly to the allowed Product schema enums
+        if (decodedSlug === 'electronics-and-instruments') {
+            mappedCategories = ['Electronics', 'Instrument'];
+            categoryName = "Electronics And Instruments";
+        } else if (decodedSlug === 'stationary-and-clothing') {
+            mappedCategories = ['Stationary', 'Other'];
+            categoryName = "Stationary And Clothing";
+        } else if (decodedSlug === 'sports & fitness' || decodedSlug === 'sports-and-fitness') {
+            mappedCategories = ['Other'];
+            categoryName = "Sports & Fitness";
+        } else if (decodedSlug === 'hostel essentials' || decodedSlug === 'hostel-essentials') {
+            mappedCategories = ['Other'];
+            categoryName = "Hostel Essentials";
+        } else {
+            const fallbackMap = {
+                'electronics': 'Electronics',
+                'instrument': 'Instrument',
+                'stationary': 'Stationary',
+                'other': 'Other'
+            };
+            mappedCategories = [fallbackMap[decodedSlug] || "Other"];
+            categoryName = mappedCategories[0];
+        }
+
+        const query = { category: { $in: mappedCategories } };
+        
+        if (college) {
+            query.college = college;
+        }
+
+        // Price Filtering
+        if (minPrice || maxPrice) {
+            query.price = {};
+            if (minPrice) query.price.$gte = Number(minPrice);
+            if (maxPrice) query.price.$lte = Number(maxPrice);
+        }
+
+        // Sorting
+        let sortOption = { createdAt: -1 };
+        if (sort === "price_asc") sortOption = { price: 1 };
+        else if (sort === "price_desc") sortOption = { price: -1 };
+        else if (sort === "newest") sortOption = { createdAt: -1 };
+
+        const products = await Product.find(query)
+            .sort(sortOption)
+            .skip(skip)
+            .limit(limit);
+
+        const totalProducts = await Product.countDocuments(query);
+        const totalPages = Math.ceil(totalProducts / limit);
+
+        res.status(200).json({
+            message: "Category products found successfully",
+            products,
+            totalPages,
+            currentPage: page,
+            totalProducts,
+            category: categoryName
+        });
+    } catch (error) {
+        console.error("Error finding products by category:", error);
+        res.status(500).json({ message: error.message });
+    }
+}
+
 module.exports = {
     CreateProduct,
     UpdateProduct,
     DeleteProduct,
     GetOneProduct,
     GetAllProduct,
-    GetMyProducts
+    GetMyProducts,
+    GetProductsByCategory
 };

@@ -12,6 +12,7 @@ const signupSchema = z.object({
   firstname: z.string().min(2, 'First name must be at least 2 characters'),
   lastname: z.string().min(2, 'Last name must be at least 2 characters'),
   email: z.string().min(1, 'Email is required').email('Invalid email address'),
+  college: z.string().min(1, 'Please select a college/campus'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string().min(1, 'Confirm password is required'),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -44,6 +45,7 @@ export default function Signup() {
       firstname: '',
       lastname: '',
       email: '',
+      college: '',
       password: '',
       confirmPassword: '',
     },
@@ -123,6 +125,26 @@ export default function Signup() {
             />
             {errors.email && (
               <p className="mt-1 text-xs text-red-500 font-medium">{errors.email.message}</p>
+            )}
+          </div>
+
+          <div className="mb-5 relative group">
+            <label htmlFor="college" className="block text-sm font-semibold text-slate-700 mb-1.5 transition-colors duration-300 group-focus-within:text-[#00B4DB]">Campus / College</label>
+            <div className="relative">
+              {/* Optional: Add an icon here if desired, e.g. <Building2 className="..." /> from lucide-react */}
+              <select 
+                id="college"
+                className={`w-full px-4 py-3 text-base text-slate-800 bg-white/90 border-2 rounded-xl outline-none transition-all duration-300 focus:ring-4 focus:bg-white appearance-none cursor-pointer ${
+                  errors.college ? 'border-red-500 focus:border-red-500 focus:ring-red-500/15' : 'border-slate-200 focus:border-brand-teal focus:ring-brand-teal/15'
+                }`}
+                {...register('college')}
+              >
+                <option value="" disabled>Select College</option>
+                <option value="NIT Calicut">NIT Calicut</option>
+              </select>
+            </div>
+            {errors.college && (
+              <p className="mt-1 text-xs text-red-500 font-medium">{errors.college.message}</p>
             )}
           </div>
 

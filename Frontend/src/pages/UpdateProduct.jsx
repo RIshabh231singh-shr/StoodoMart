@@ -15,6 +15,8 @@ const productSchema = z.object({
   image: z.string().url("Must be a valid image URL"),
   category: z.enum(["Electronics", "Instrument", "Stationary", "Other"], { errorMap: () => ({ message: "Please select a valid category" }) }),
   stock: z.coerce.number().min(0, "Stock cannot be negative").int("Stock must be a whole number"),
+  usedFor: z.string().min(1, "Usage info is required"),
+  originalPrice: z.coerce.number().min(0, "Original price cannot be negative"),
 });
 
 export default function UpdateProduct() {
@@ -39,6 +41,8 @@ export default function UpdateProduct() {
       image: "",
       category: "",
       stock: "",
+      usedFor: "",
+      originalPrice: "",
     },
   });
 
@@ -58,6 +62,8 @@ export default function UpdateProduct() {
             image: product.image,
             category: product.category,
             stock: product.stock,
+            usedFor: product.usedFor || "",
+            originalPrice: product.originalPrice || "",
           });
         }
       } catch (err) {
@@ -193,6 +199,37 @@ export default function UpdateProduct() {
                         />
                     </div>
                     {errors.stock && <p className="text-red-400 text-xs ml-1 font-medium">{errors.stock.message}</p>}
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                    <label className="text-sm font-bold text-slate-200 ml-1">Used For (Duration) *</label>
+                    <div className="relative">
+                        <FileText className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 pointer-events-none" />
+                        <input
+                        type="text"
+                        {...register("usedFor")}
+                        className={`w-full pl-11 pr-4 py-3 bg-white/10 border ${errors.usedFor ? 'border-red-400 focus:border-red-400' : 'border-white/20 focus:border-indigo-400'} rounded-xl text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all shadow-sm`}
+                        placeholder="e.g. 6 Months"
+                        />
+                    </div>
+                    {errors.usedFor && <p className="text-red-400 text-xs ml-1 font-medium">{errors.usedFor.message}</p>}
+                    </div>
+
+                    <div className="space-y-2">
+                    <label className="text-sm font-bold text-slate-200 ml-1">Original Price (Rs.) *</label>
+                    <div className="relative">
+                        <Tag className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 pointer-events-none" />
+                        <input
+                        type="number"
+                        step="0.01"
+                        {...register("originalPrice")}
+                        className={`w-full pl-11 pr-4 py-3 bg-white/10 border ${errors.originalPrice ? 'border-red-400 focus:border-red-400' : 'border-white/20 focus:border-indigo-400'} rounded-xl text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all shadow-sm`}
+                        placeholder="0.00"
+                        />
+                    </div>
+                    {errors.originalPrice && <p className="text-red-400 text-xs ml-1 font-medium">{errors.originalPrice.message}</p>}
                     </div>
                 </div>
 

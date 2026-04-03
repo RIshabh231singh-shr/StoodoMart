@@ -6,7 +6,8 @@ const {
     DeleteProduct,
     GetOneProduct,
     GetAllProduct,
-    GetMyProducts
+    GetMyProducts,
+    GetProductsByCategory
 } = require("../controllers/productverify");
 const userMiddleware = require("../middlewares/usermiddleware");
 const adminMiddleware = require("../middlewares/adminmiddleware");
@@ -16,8 +17,9 @@ const upload = require("../middlewares/uploadMiddleware");
 ProductRouter.post("/createproduct", adminMiddleware, upload.single("image"), CreateProduct);
 ProductRouter.put("/updateproduct/:id",adminMiddleware,UpdateProduct);
 ProductRouter.delete("/deleteproduct/:id",adminMiddleware,DeleteProduct);
-ProductRouter.get("/getoneproduct/:id",userMiddleware,GetOneProduct);
-ProductRouter.get("/getallproduct",userMiddleware,GetAllProduct);
+ProductRouter.get("/getoneproduct/:id", GetOneProduct); // Made public
+ProductRouter.get("/getallproduct", GetAllProduct); // Made public so unauth users can view Shop
 ProductRouter.get("/myproducts",adminMiddleware,GetMyProducts);
+ProductRouter.get("/category/:slug", GetProductsByCategory); // Open to public/all users
 
 module.exports = ProductRouter;

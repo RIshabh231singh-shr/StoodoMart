@@ -34,6 +34,11 @@ const personSchema = new mongoose.Schema({
         type: String,
         default: null,
     },
+    college: {
+        type: String,
+        trim: true,
+        default: null,
+    },
 },{timestamps:true});
 
 

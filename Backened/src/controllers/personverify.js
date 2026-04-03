@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cloudinary = require("../config/cloudinary");
 
+
 // Helper to upload buffer to Cloudinary
 const uploadToCloudinary = (buffer, folder) => {
     return new Promise((resolve, reject) => {
@@ -23,7 +24,7 @@ const register = async (req, res) => {
             return res.status(400).json({ message: validation.message });
         }
 
-        const { firstname, lastname, email, password, role } = req.body;
+        const { firstname, lastname, email, password, role, college } = req.body;
 
         const existingPerson = await Person.findOne({ email });
         if (existingPerson) {
@@ -38,7 +39,8 @@ const register = async (req, res) => {
             lastname,
             email,
             password: hashedPassword,
-            role
+            role,
+            college
         });
         newPerson.password = undefined;
 
@@ -99,8 +101,8 @@ const updateprofile = async (req,res)=>{
 
         // Handle optional avatar upload
         if (req.file) {
-            const result = await uploadToCloudinary(req.file.buffer, "stoodomart/avatars");
-            updateData.avatar = result.secure_url;
+            const uploadResult = await uploadToCloudinary(req.file.buffer, "stoodomart/avatars");
+            updateData.avatar = uploadResult.secure_url;
         }
 
         const updateperson = await Person.findByIdAndUpdate(
@@ -271,6 +273,33 @@ const verifyAuth = async (req, res) => {
     }
 };
 
+const promoteToAdmin = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const person = await Person.findByIdAndUpdate(
+            userId,
+            { role: "Admin" },
+            { new: true, runValidators: true }
+        );
+
+        if (!person) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // We should also update the JWT token if role change needs to be reflected in token immediately
+        // However, for simplicity and since we update local state, let's just return the user
+        person.password = undefined;
+
+        res.status(200).json({
+            message: "User promoted to Admin successfully",
+            person: person
+        });
+    } catch (error) {
+        console.error("Error promoting user to Admin:", error);
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+};
+
 module.exports = {
-    register , updateprofile , deleteprofile , login , getOneProfile , getAllProfile , logout, verifyAuth
+    register, updateprofile, deleteprofile, login, getOneProfile, getAllProfile, logout, verifyAuth, promoteToAdmin
 };

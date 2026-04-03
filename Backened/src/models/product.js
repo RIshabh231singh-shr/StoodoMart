@@ -37,6 +37,21 @@ const productSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Person",
         required: true,
+    },
+    college: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    usedFor: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    originalPrice: {
+        type: Number,
+        required: true,
+        min: 0,
     }
 },{
     timestamps: true,
