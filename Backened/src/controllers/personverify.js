@@ -3,7 +3,9 @@ const Person = require("../models/person");
 const validateUser = require("../Utility/validate")
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const cloudinary = require("../config/cloudinary");
+const sendEmail = require("../Utility/sendEmail");
 
 
 // Helper to upload buffer to Cloudinary
@@ -19,64 +21,133 @@ const uploadToCloudinary = (buffer, folder) => {
 
 const register = async (req, res) => {
     try {
+        // validation check
         const validation = validateUser(req.body);
         if (!validation.isValid) {
             return res.status(400).json({ message: validation.message });
         }
 
-        const { firstname, lastname, email, password, role, college } = req.body;
+        const { firstname, lastname, email, password, role, college, contactNumber } = req.body;
 
+        // check if the user already exist
         const existingPerson = await Person.findOne({ email });
         if (existingPerson) {
             return res.status(400).json({ message: "Email is already registered" });
         }
 
+        // password hashing
         const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        const hashedPassword = await bcrypt.hash(password, salt); // it means salt is added to the password and then hashed
 
-        const newPerson = await Person.create({
+        let formattedContactNumber = contactNumber;
+        if (formattedContactNumber && !formattedContactNumber.startsWith('+91')) {
+            formattedContactNumber = '+91' + formattedContactNumber;
+        }
+
+        // NOW CREATE THE USER IN DATABSE 
+
+        const savedPerson = await Person.create({
             firstname,
             lastname,
             email,
             password: hashedPassword,
             role,
-            college
-        });
-        newPerson.password = undefined;
-
-        const token = jwt.sign({ id: newPerson._id,role:newPerson.role }, process.env.JWT_SECRET, {
-            expiresIn: "1h"
+            college,
+            contactNumber: formattedContactNumber
         });
 
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: false,
-            maxAge: 60 * 60 * 1000
-        });
+        // NOW GENERATE THE OTP
+        // crypto module tumne upar already require kiya hua hai
+        const otp = crypto.randomInt(100000, 999999).toString();
+        // save the OTP and expiry in the saved person document 
+        savedPerson.otp = otp;
+        savedPerson.otpExpiry = Date.now() + 5 * 60 * 1000;
+        await savedPerson.save();
+
+        await sendEmail(savedPerson.email, otp);
+
+        savedPerson.password = undefined;
+
+
 
         res.status(201).json({
-            message: "Person registered successfully",
-            person: newPerson,
+            message: "Person registered successfully! Please check your email for otp",
+            person: savedPerson
         });
 
     } catch (error) {
-        console.error("Error registering person:", error);
+        console.error("Error while registering person:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
 
-const updateprofile = async (req,res)=>{
-    try{
+const verifyOtp = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+
+        if (!email || !otp) {
+            return res.status(400).json({ message: "Email and OTP are required" });
+        }
+
+        // find the user
+        const person = await Person.findOne({ email });
+
+        if (!person) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // 2. Check otp
+        if (person.otp !== otp || person.otpExpiry < Date.now()) {
+            return res.status(400).json({ message: "Invalid or expired OTP" });
+        }
+
+        // remove otp
+        person.isVerified = true;
+        person.otp = undefined;
+        person.otpExpiry = undefined;
+        await person.save();
+
+        const token = jwt.sign(
+            { id: person._id, role: person.role },
+            process.env.JWT_SECRET,
+            { expiresIn: "7d" } // 7 days 
+        );
+
+        // add cookies 
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: false, // Production mein true karna (https)
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        });
+
+
+        person.password = undefined;
+
+        res.status(200).json({
+            message: "Email verified successfully! You can now access StudoMart.",
+            person: person
+        });
+
+    } catch (error) {
+        console.error("Error while verifying OTP:", error);
+        res.status(500).json({ message: "Internal server error", error: error.message });
+
+    }
+}
+
+const updateprofile = async (req, res) => {
+    try {
         const validation = validateUser(req.body, true);
         if (!validation.isValid) {
             return res.status(400).json({ message: validation.message });
         }
 
         const { id } = req.params;
-        if(!id){
+        if (!id) {
             return res.status(400).json({ message: "Person ID is required" });
         }
-        
+
         const loggedInUserId = req.user.id;
         const loggedInUserRole = req.user.role;
         if (loggedInUserRole !== "SuperAdmin" && loggedInUserId !== id) {
@@ -84,17 +155,17 @@ const updateprofile = async (req,res)=>{
                 message: "You are not allowed to update this user"
             });
         }
-        
+
         const { firstname, lastname, email, password, role } = req.body;
-        
+
         const updateData = { firstname, lastname, email };
-        
+
         if (password) {
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(password, salt);
             updateData.password = hashedPassword;
         }
-        
+
         if (role) {
             updateData.role = role;
         }
@@ -108,7 +179,7 @@ const updateprofile = async (req,res)=>{
         const updateperson = await Person.findByIdAndUpdate(
             id,
             updateData,
-            {new:true,runValidators: true}
+            { new: true, runValidators: true }
         )
         if (!updateperson) {
             return res.status(404).json({ message: "Person not found" });
@@ -120,18 +191,18 @@ const updateprofile = async (req,res)=>{
             person: updateperson
         })
     }
-    catch(error){
+    catch (error) {
         console.error("Error Updating person data :", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 }
 
-const deleteprofile = async (req,res)=>{
-    try{
+const deleteprofile = async (req, res) => {
+    try {
         const loggedInUserId = req.user.id;
         const loggedInUserRole = req.user.role;
         const { id } = req.params;
-         if(!id){
+        if (!id) {
             return res.status(400).json({ message: "Person ID is required" });
         }
         if (loggedInUserRole !== "SuperAdmin" && loggedInUserId !== id) {
@@ -140,7 +211,7 @@ const deleteprofile = async (req,res)=>{
             });
         }
         const deleteperson = await Person.findByIdAndDelete(id);
-        if(!deleteperson){
+        if (!deleteperson) {
             return res.status(404).json({ message: "Person not found" });
         }
         deleteperson.password = undefined;
@@ -149,14 +220,14 @@ const deleteprofile = async (req,res)=>{
             person: deleteperson
         })
     }
-    catch(error){
+    catch (error) {
         console.error("Error Deleting person data :", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 }
 
-const login = async (req,res)=>{
-    try{
+const login = async (req, res) => {
+    try {
         const { email, password } = req.body;
         if (!email || !password) {
             return res.status(400).json({ message: "Email and password are required" });
@@ -165,11 +236,19 @@ const login = async (req,res)=>{
         if (!person) {
             return res.status(404).json({ message: "Person not found" });
         }
+
+        // check if the user is verified 
+        if (!person.isVerified) {
+            return res.status(401).json({
+                message: "Email is not verified. Please verify your OTP first."
+            });
+        }
+
         const isPasswordValid = await bcrypt.compare(password, person.password);
         if (!isPasswordValid) {
             return res.status(401).json({ message: "Invalid password" });
         }
-        const token = jwt.sign({ id: person._id ,role: person.role}, process.env.JWT_SECRET, {
+        const token = jwt.sign({ id: person._id, role: person.role }, process.env.JWT_SECRET, {
             expiresIn: "1h"
         });
         person.password = undefined;
@@ -184,20 +263,20 @@ const login = async (req,res)=>{
             person: person,
         })
     }
-    catch(error){
+    catch (error) {
         console.error("Error Logging in person :", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 }
 
-const getOneProfile = async (req,res)=>{
-    try{
+const getOneProfile = async (req, res) => {
+    try {
         const { id } = req.params;
-        if(!id){
+        if (!id) {
             return res.status(400).json({ message: "Person ID is required" });
         }
         const person = await Person.findById(id);
-        if(!person){
+        if (!person) {
             return res.status(404).json({ message: "Person not found" });
         }
         person.password = undefined;
@@ -206,14 +285,14 @@ const getOneProfile = async (req,res)=>{
             person: person,
         })
     }
-    catch(error){
+    catch (error) {
         console.error("Error Fetching person profile :", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 }
 
-const getAllProfile = async (req,res)=>{
-    try{
+const getAllProfile = async (req, res) => {
+    try {
         let { page, limit, email } = req.query;
         page = parseInt(page) || 1;
         limit = parseInt(limit) || 10;
@@ -236,25 +315,25 @@ const getAllProfile = async (req,res)=>{
             totalPersons: totalPersons
         })
     }
-    catch(error){
+    catch (error) {
         console.error("Error Fetching person profile :", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 }
 
-const logout = async (req,res)=>{
-    try{
+const logout = async (req, res) => {
+    try {
         const { token } = req.cookies;
-        if(!token){
+        if (!token) {
             return res.status(400).json({ message: "Token is required" });
         }
         const payload = jwt.decode(token);
-        await redisClient.set(`token : ${token}`,"Blocked");
-        await redisClient.expireAt(`token : ${token}`,payload.exp);
+        await redisClient.set(`token : ${token}`, "Blocked");
+        await redisClient.expireAt(`token : ${token}`, payload.exp);
         res.clearCookie("token");
         res.status(200).json({ message: "Person logged out successfully" });
     }
-    catch(error){
+    catch (error) {
         console.error("Error Logging out person :", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
@@ -300,6 +379,53 @@ const promoteToAdmin = async (req, res) => {
     }
 };
 
+const changeCurrentPassword = async (req, res) => {
+    try {
+
+        const { oldPassword, newPassword } = req.body
+
+        const user = await Person.findById(req.user._id);
+        //  matlab ki find user fromm database
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const isPasswordCorrect = await user.isPasswordCorrect(oldPassword); // matlab ki check karo ki old password sahi hai ya nahi
+
+        if (!isPasswordCorrect) {
+            return res.status(400).json({ message: "Invalid old password" });
+        }
+
+        // FIX 3: Hash the new password before saving it (CRITICAL!)
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+
+        await user.save({ validateBeforeSave: false }) // matlab ki save kar do database me
+
+        return res.status(200).json({ message: "Password changed successfully" });
+
+    } catch (error) {
+        console.error("Password change error:", error);
+        return res.status(500).json({ message: error.message || "Internal server error", stack: error.stack });
+    }
+
+
+}
+
+
+
 module.exports = {
-    register, updateprofile, deleteprofile, login, getOneProfile, getAllProfile, logout, verifyAuth, promoteToAdmin
+    register,
+    updateprofile,
+    deleteprofile,
+    login,
+    getOneProfile,
+    getAllProfile,
+    logout,
+    verifyAuth,
+    promoteToAdmin,
+    verifyOtp,
+    changeCurrentPassword,
+
 };

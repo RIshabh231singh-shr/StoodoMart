@@ -11,6 +11,11 @@ const validateUser = (data, isUpdate = false) => {
     if (!validator.isEmail(data.email))
         return { isValid: false, message: "Invalid email" };
 
+    if (!isUpdate || data.contactNumber) {
+        if (!data.contactNumber)
+            return { isValid: false, message: "Contact number is required" };
+    }
+
     if (!isUpdate || data.password) {
         if (!data.password)
             return { isValid: false, message: "Password is required" };

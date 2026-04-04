@@ -15,8 +15,8 @@ export default function HeroSection() {
 
           {/* Hero Content */}
           <div className="w-full lg:w-1/2 flex flex-col items-start text-left">
-            <div className="inline-block px-4 py-1.5 rounded-full bg-red-100 text-brand-red font-bold text-sm mb-6 animate-pulse">
-              🎉 Early Access Sale - Up to 50% Off!
+            <div className="inline-block px-4 py-1.5 rounded-full bg-red-100 text-brand-red font-bold text-sm mb-6 animate-[slowPulse_4s_ease-in-out_infinite]">
+              Your Campus Marketplace — Buy, Sell & Save Smart
             </div>
 
             <h1 className="text-5xl lg:text-7xl font-extrabold text-slate-900 leading-[1.1] tracking-tight mb-6">
