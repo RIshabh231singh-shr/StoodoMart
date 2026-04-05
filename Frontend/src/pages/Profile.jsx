@@ -121,36 +121,36 @@ export default function Profile() {
     <div className="flex flex-col min-h-screen bg-slate-800 bg-gradient-to-br from-indigo-500/40 via-purple-500/40 to-slate-800/40 font-sans relative overflow-hidden">
 
       {/* Profile Navbar */}
-      <nav className="relative z-20 bg-white/10 backdrop-blur-md border-b border-white/20 px-6 py-4 flex justify-between items-center shadow-sm">
+      <nav className="relative z-20 bg-white/10 backdrop-blur-md border-b border-white/20 px-4 sm:px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 shadow-sm">
         <Link to="/" className="flex items-center gap-2 group decoration-transparent">
-          <img src={logo} alt="StoodoMart Logo" className="w-10 h-auto drop-shadow-md transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3" />
-          <span className="text-2xl font-extrabold text-white tracking-tight drop-shadow-md">Stoodo<span className="text-purple-400">Mart</span></span>
+          <img src={logo} alt="StoodoMart Logo" className="w-8 sm:w-10 h-auto drop-shadow-md transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3" />
+          <span className="text-xl sm:text-2xl font-extrabold text-white tracking-tight drop-shadow-md">Stoodo<span className="text-purple-400">Mart</span></span>
         </Link>
-        <div className="flex gap-4">
+        <div className="flex flex-wrap justify-center gap-3 sm:gap-4 w-full md:w-auto">
           {/* My Orders — visible to all logged-in users */}
           <button
             onClick={() => navigate('/my-orders')}
-            className="px-5 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:to-indigo-500 text-white font-extrabold rounded-xl transition-all shadow-[0_4px_15px_rgba(99,102,241,0.3)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.4)] hover:-translate-y-0.5 border border-indigo-400/50"
+            className="px-3 sm:px-5 py-1.5 sm:py-2 text-sm sm:text-base bg-gradient-to-r from-indigo-500 to-purple-500 hover:to-indigo-500 text-white font-extrabold rounded-xl transition-all shadow-[0_4px_15px_rgba(99,102,241,0.3)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.4)] hover:-translate-y-0.5 border border-indigo-400/50"
           >
             My Orders
           </button>
           {(profileData.role === 'Admin' || profileData.role === 'SuperAdmin') && (
-            <div className="flex gap-4">
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
               <button
                 onClick={() => navigate('/add-product')}
-                className="px-5 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:to-indigo-500 text-white font-extrabold rounded-xl transition-all shadow-[0_4px_15px_rgba(99,102,241,0.3)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.4)] hover:-translate-y-0.5 border border-indigo-400/50"
+                className="px-3 sm:px-5 py-1.5 sm:py-2 text-sm sm:text-base bg-gradient-to-r from-indigo-500 to-purple-500 hover:to-indigo-500 text-white font-extrabold rounded-xl transition-all shadow-[0_4px_15px_rgba(99,102,241,0.3)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.4)] hover:-translate-y-0.5 border border-indigo-400/50"
               >
                 Add Product
               </button>
               <button
                 onClick={() => navigate('/my-products')}
-                className="px-5 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:to-indigo-500 text-white font-extrabold rounded-xl transition-all shadow-[0_4px_15px_rgba(99,102,241,0.3)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.4)] hover:-translate-y-0.5 border border-indigo-400/50"
+                className="px-3 sm:px-5 py-1.5 sm:py-2 text-sm sm:text-base bg-gradient-to-r from-indigo-500 to-purple-500 hover:to-indigo-500 text-white font-extrabold rounded-xl transition-all shadow-[0_4px_15px_rgba(99,102,241,0.3)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.4)] hover:-translate-y-0.5 border border-indigo-400/50"
               >
                 My Products
               </button>
               <button
                 onClick={() => navigate('/admin/orders')}
-                className="px-5 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:to-indigo-500 text-white font-extrabold rounded-xl transition-all shadow-[0_4px_15px_rgba(99,102,241,0.3)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.4)] hover:-translate-y-0.5 border border-indigo-400/50"
+                className="px-3 sm:px-5 py-1.5 sm:py-2 text-sm sm:text-base bg-gradient-to-r from-indigo-500 to-purple-500 hover:to-indigo-500 text-white font-extrabold rounded-xl transition-all shadow-[0_4px_15px_rgba(99,102,241,0.3)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.4)] hover:-translate-y-0.5 border border-indigo-400/50"
               >
                 All Orders
               </button>
@@ -159,7 +159,7 @@ export default function Profile() {
           {profileData.role === 'SuperAdmin' && (
             <button
               onClick={() => navigate('/superadmin/all-profiles')}
-              className="px-5 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:to-indigo-500 text-white font-extrabold rounded-xl transition-all shadow-[0_4px_15px_rgba(99,102,241,0.3)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.4)] hover:-translate-y-0.5 border border-indigo-400/50"
+              className="px-3 sm:px-5 py-1.5 sm:py-2 text-sm sm:text-base bg-gradient-to-r from-indigo-500 to-purple-500 hover:to-indigo-500 text-white font-extrabold rounded-xl transition-all shadow-[0_4px_15px_rgba(99,102,241,0.3)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.4)] hover:-translate-y-0.5 border border-indigo-400/50"
             >
               Get All Profiles
             </button>
