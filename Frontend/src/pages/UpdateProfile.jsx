@@ -2,14 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useNavigate, Link } from "react-router";
+import { useNavigate } from "react-router";
 import { useSelector, useDispatch } from "react-redux";
 import axiosClient from "../utility/axios";
 import { CheckAuthThunk } from "../Authslice";
-import logo from "../assets/logo.png";
-import { Loader2, User, Mail, ShieldAlert, Upload } from "lucide-react";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import { User, Mail, ShieldAlert, Upload, Image as ImageIcon, ArrowLeft } from "lucide-react";
 
-// Matches backend validation setup but makes password optional for updates
+// Matches backend validation setup
 const updateSchemaBase = z.object({
   firstname: z.string().min(1, "Firstname is required"),
   lastname: z.string().optional(),
@@ -91,10 +92,7 @@ export default function UpdateProfile() {
         headers: { "Content-Type": "multipart/form-data" },
       });
       
-      // Update global redux state silently behind the scenes
       dispatch(CheckAuthThunk());
-      
-      // Send back to profile page
       navigate("/profile");
     } catch (err) {
       setApiError(err.response?.data?.message || "Failed to update profile. Please try again.");
@@ -105,63 +103,58 @@ export default function UpdateProfile() {
 
   if (pageLoading) {
     return (
-      <div className="min-h-screen flex flex-col justify-center items-center bg-slate-800 bg-gradient-to-br from-indigo-500/40 via-purple-500/40 to-slate-800/40 absolute inset-0 z-50 p-6">
-         <div className="animate-pulse flex flex-col items-center gap-5 w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2rem] p-8 shadow-2xl">
-            <div className="h-8 w-3/4 bg-white/20 rounded-xl mb-4"></div>
+      <div className="flex flex-col min-h-screen bg-slate-50 font-sans">
+        <Header />
+        <main className="flex-grow flex items-center justify-center pt-32 pb-20">
+          <div className="animate-pulse flex flex-col items-center gap-5 w-full max-w-md bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
+            <div className="h-8 w-3/4 bg-slate-100 rounded-xl mb-4"></div>
             <div className="flex gap-4 w-full">
-              <div className="h-12 w-1/2 bg-white/20 rounded-xl"></div>
-              <div className="h-12 w-1/2 bg-white/20 rounded-xl"></div>
+              <div className="h-12 w-1/2 bg-slate-100 rounded-xl"></div>
+              <div className="h-12 w-1/2 bg-slate-100 rounded-xl"></div>
             </div>
-            <div className="h-12 w-full bg-white/20 rounded-xl mb-2"></div>
-            <div className="h-14 w-full bg-indigo-500/30 rounded-xl mt-4"></div>
-         </div>
+            <div className="h-12 w-full bg-slate-100 rounded-xl mb-2"></div>
+            <div className="h-14 w-full bg-slate-200 rounded-xl mt-4"></div>
+          </div>
+        </main>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden bg-slate-800 bg-gradient-to-br from-indigo-500/40 via-purple-500/40 to-slate-800/40">
-      
-      {/* Navbar Integration */}
-      <nav className="relative z-20 px-8 py-5 border-b border-white/20 flex items-center justify-between w-full bg-white/10 backdrop-blur-md">
-        <Link to="/" className="flex items-center gap-3 group">
-          <div className="bg-white/10 p-2 rounded-xl backdrop-blur-md transition-all group-hover:bg-white/20">
-            <img src={logo} alt="StoodoMart Logo" className="w-10 h-auto" />
-          </div>
-          <h1 className="text-xl font-extrabold tracking-tight text-white drop-shadow-md">
-            Stoodo<span className="text-purple-400">Mart</span>
-          </h1>
-        </Link>
-        <Link to="/profile" className="px-5 py-2 rounded-xl text-sm font-bold bg-white/10 text-white hover:bg-white/20 transition-colors backdrop-blur-md">
-           Cancel
-        </Link>
-      </nav>
+    <div className="flex flex-col min-h-screen bg-slate-50 font-sans text-slate-900">
+      <Header />
 
-      {/* Main Content Area */}
-      <div className="relative z-10 flex-1 flex flex-col justify-center items-center p-6 mt-4
-      ">
+      <main className="flex-grow pt-32 pb-24 container mx-auto px-4 md:px-8 flex justify-center">
         
-        <div className="max-w-md w-full backdrop-blur-3xl border border-white/20 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden transform transition-all duration-300
-        bg-white/0.1 backdrop-blur-xl border border-white/40 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)]
-        ">
-          <div className="p-8">
-            <div className="text-center mb-8">
-              {/* Avatar Preview */}
-              <div className="relative inline-block mb-4">
-                <div className="w-24 h-24 rounded-full border-4 border-white/20 overflow-hidden mx-auto shadow-xl">
+        <div className="w-full max-w-2xl">
+          
+          <button 
+            onClick={() => navigate("/profile")}
+            className="flex items-center gap-2 text-slate-500 hover:text-brand-teal font-bold mb-8 transition-colors group"
+          >
+           <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" /> Back to Profile
+          </button>
+
+          <div className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-sm border border-slate-200 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-brand-teal to-brand-green"></div>
+            
+            <div className="flex flex-col md:flex-row gap-8 items-start md:items-center mb-12">
+              {/* Avatar Preview & Upload */}
+              <div className="relative group shrink-0">
+                <div className="w-32 h-32 rounded-full border-4 border-slate-50 overflow-hidden shadow-xl bg-slate-100">
                   {avatarPreview ? (
                     <img src={avatarPreview} alt="New avatar" className="w-full h-full object-cover" />
                   ) : currentAvatar ? (
                     <img src={currentAvatar} alt="Current avatar" className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-3xl font-black">
+                    <div className="w-full h-full bg-gradient-to-br from-brand-teal to-brand-green flex items-center justify-center text-white text-4xl font-black">
                       {user?.firstname?.charAt(0).toUpperCase() || "?"}
                     </div>
                   )}
                 </div>
-                {/* Upload button overlay */}
-                <label htmlFor="avatarInput" className="absolute -bottom-1 -right-1 w-8 h-8 bg-indigo-500 hover:bg-indigo-400 rounded-full flex items-center justify-center cursor-pointer border-2 border-white/20 shadow-md transition-all">
-                  <Upload size={14} className="text-white" />
+                <label htmlFor="avatarInput" className="absolute bottom-0 right-0 w-10 h-10 bg-slate-900 hover:bg-brand-teal text-white rounded-full flex items-center justify-center cursor-pointer border-4 border-white shadow-lg transition-all transform hover:scale-110 active:scale-95">
+                  <Upload size={18} />
                   <input
                     id="avatarInput"
                     type="file"
@@ -177,97 +170,108 @@ export default function UpdateProfile() {
                   />
                 </label>
               </div>
-              <h2 className="text-3xl font-extrabold text-white mb-1">Update Profile</h2>
-              <p className="text-slate-300 text-sm">{avatarFile ? "New photo selected" : "Click the camera icon to change photo"}</p>
+
+              <div className="flex-grow">
+                <h1 className="text-3xl font-black text-slate-900 mb-2 leading-tight">Update Profile</h1>
+                <p className="text-slate-500 leading-relaxed font-medium">
+                  {avatarFile ? "Looks great! Ready to save?" : "Personalize your presence on the campus marketplace."}
+                </p>
+              </div>
             </div>
 
             {apiError && (
-              <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/50 text-red-200 text-sm flex items-center gap-3">
-                <ShieldAlert size={18} />
+              <div className="mb-8 p-4 rounded-2xl bg-red-50 border border-red-100 text-red-600 text-sm flex items-center gap-3 font-medium">
+                <ShieldAlert size={18} className="shrink-0" />
                 <span>{apiError}</span>
               </div>
             )}
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
               
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2 relative">
-                  <label className="text-sm font-bold text-slate-300 ml-1">First Name <span className="text-red-400">*</span></label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2 group">
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1 group-focus-within:text-brand-teal transition-colors">First Name</label>
                   <div className="relative">
-                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 pointer-events-none" />
+                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-300 w-5 h-5 pointer-events-none group-focus-within:text-brand-teal transition-colors" />
                     <input
                       type="text"
                       {...register("firstname")}
-                      className="w-full pl-11 pr-4 py-3 bg-slate-800/50 border border-slate-600 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all"
-                      placeholder="John"
+                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-brand-teal/10 focus:border-brand-teal focus:bg-white transition-all font-bold"
+                      placeholder="e.g. Rahul"
                     />
                   </div>
-                  {errors.firstname && <p className="text-red-400 text-xs ml-1 font-medium">{errors.firstname.message}</p>}
+                  {errors.firstname && <p className="text-red-500 text-xs ml-1 font-bold">{errors.firstname.message}</p>}
                 </div>
                 
-                <div className="space-y-2 relative">
-                  <label className="text-sm font-bold text-slate-300 ml-1">Last Name</label>
+                <div className="space-y-2 group">
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1 group-focus-within:text-brand-teal transition-colors">Last Name</label>
                   <div className="relative">
-                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 pointer-events-none" />
+                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-300 w-5 h-5 pointer-events-none group-focus-within:text-brand-teal transition-colors" />
                     <input
                       type="text"
                       {...register("lastname")}
-                      className="w-full pl-11 pr-4 py-3 bg-slate-800/50 border border-slate-600 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all"
-                      placeholder="Doe"
+                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-brand-teal/10 focus:border-brand-teal focus:bg-white transition-all font-bold"
+                      placeholder="e.g. Kumar"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-2 relative">
-                <label className="text-sm font-bold text-slate-300 ml-1">Email <span className="text-red-400">*</span></label>
+              <div className="space-y-2 group">
+                <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1 group-focus-within:text-brand-teal transition-colors">Email Address</label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 pointer-events-none" />
+                  <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-300 w-5 h-5 pointer-events-none group-focus-within:text-brand-teal transition-colors" />
                   <input
                     type="email"
                     {...register("email")}
-                    className="w-full pl-11 pr-4 py-3 bg-slate-800/50 border border-slate-600 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all"
-                    placeholder="john@example.com"
+                    className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-brand-teal/10 focus:border-brand-teal focus:bg-white transition-all font-bold"
+                    placeholder="name@nitc.ac.in"
                   />
                 </div>
-                {errors.email && <p className="text-red-400 text-xs ml-1 font-medium">{errors.email.message}</p>}
+                {errors.email && <p className="text-red-500 text-xs ml-1 font-bold">{errors.email.message}</p>}
               </div>
 
               {/* Conditional Role Selection for SuperAdmin Only */}
               {user?.role === "SuperAdmin" && (
-                <div className="space-y-2 relative">
-                  <label className="text-sm font-bold text-purple-400 ml-1">Role (SuperAdmin Only)</label>
+                <div className="space-y-2 group">
+                  <label className="text-xs font-black uppercase tracking-widest text-brand-teal ml-1">Platform Role</label>
                   <select
                     {...register("role")}
-                    className="w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all appearance-none cursor-pointer"
+                    className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 font-bold focus:outline-none focus:ring-4 focus:ring-brand-teal/10 focus:border-brand-teal focus:bg-white transition-all appearance-none cursor-pointer"
                   >
-                    <option value="User">User</option>
-                    <option value="Admin">Admin</option>
-                    <option value="SuperAdmin">SuperAdmin</option>
+                    <option value="User">Standard User</option>
+                    <option value="Admin">Campus Admin</option>
+                    <option value="SuperAdmin">System SuperAdmin</option>
                   </select>
-                  {errors.role && <p className="text-red-400 text-xs ml-1 font-medium">{errors.role.message}</p>}
+                  {errors.role && <p className="text-red-500 text-xs ml-1 font-bold">{errors.role.message}</p>}
                 </div>
               )}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-4 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black rounded-xl shadow-lg shadow-purple-500/20 transition-all active:scale-[0.98] mt-6 flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                {loading ? (
-                  <div className="flex gap-2 items-center">
-                    <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
-                    <div className="w-2 h-2 rounded-full bg-white animate-pulse delay-75"></div>
-                    <div className="w-2 h-2 rounded-full bg-white animate-pulse delay-150"></div>
-                  </div>
-                ) : (
-                  "Publish Changes"
-                )}
-              </button>
+              <div className="pt-4 flex flex-col sm:flex-row gap-4 items-center justify-between border-t border-slate-100 mt-10">
+                <p className="text-slate-400 text-xs font-medium">Fields marked with <span className="text-red-400">*</span> are mandatory</p>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full sm:w-auto px-10 py-5 bg-slate-900 hover:bg-brand-teal text-white font-black rounded-2xl shadow-xl shadow-slate-200 transition-all hover:-translate-y-1 active:scale-95 flex justify-center items-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed group"
+                >
+                  {loading ? (
+                    <span className="flex items-center gap-2">
+                       <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
+                       <div className="w-2 h-2 rounded-full bg-white animate-pulse delay-75"></div>
+                       <div className="w-2 h-2 rounded-full bg-white animate-pulse delay-150"></div>
+                       Saving...
+                    </span>
+                  ) : (
+                    <>Save Changes <ImageIcon size={20} className="group-hover:rotate-12 transition-transform" /></>
+                  )}
+                </button>
+              </div>
             </form>
           </div>
         </div>
-      </div>
+      </main>
+
+      <Footer />
     </div>
   );
 }

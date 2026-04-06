@@ -1,24 +1,25 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Link, useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 import axiosClient from "../utility/axios";
-import { ChevronLeft, ChevronRight, Clock, CheckCircle, XCircle, ShoppingBag } from "lucide-react";
-import logo from "../assets/logo.png";
+import { ChevronLeft, ChevronRight, Clock, CheckCircle, XCircle, ShoppingBag, Package, ArrowLeft, Plus } from "lucide-react";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 const STATUS_STYLES = {
-  Pending:   { cls: "bg-yellow-400/20 text-yellow-300 border-yellow-400/40", icon: <Clock size={13} /> },
-  Completed: { cls: "bg-green-400/20 text-green-300 border-green-400/40",   icon: <CheckCircle size={13} /> },
-  Cancelled: { cls: "bg-red-400/20 text-red-300 border-red-400/40",          icon: <XCircle size={13} /> },
+  Pending:   { cls: "bg-amber-50 text-amber-600 border-amber-100", icon: <Clock size={14} /> },
+  Completed: { cls: "bg-emerald-50 text-emerald-600 border-emerald-100",   icon: <CheckCircle size={14} /> },
+  Cancelled: { cls: "bg-rose-50 text-rose-600 border-rose-100",          icon: <XCircle size={14} /> },
 };
 
 // Shimmer skeleton row
 const SkeletonRow = () => (
-  <div className="animate-pulse bg-white/5 rounded-2xl p-5 border border-white/10 space-y-3">
-    <div className="flex justify-between">
-      <div className="h-4 w-32 bg-white/20 rounded" />
-      <div className="h-5 w-20 bg-white/20 rounded-full" />
+  <div className="animate-pulse bg-white rounded-3xl p-6 border border-slate-200 space-y-4 mb-4">
+    <div className="flex justify-between items-center">
+      <div className="h-4 w-32 bg-slate-100 rounded" />
+      <div className="h-6 w-24 bg-slate-100 rounded-full" />
     </div>
-    <div className="h-4 w-48 bg-white/10 rounded" />
-    <div className="h-4 w-24 bg-white/10 rounded" />
+    <div className="h-6 w-48 bg-slate-100 rounded" />
+    <div className="h-10 w-full bg-slate-50 rounded-2xl" />
   </div>
 );
 
@@ -47,84 +48,107 @@ export default function MyOrders() {
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
   return (
-    <div className="min-h-screen font-sans flex flex-col bg-slate-800 bg-gradient-to-br from-indigo-500/40 via-purple-500/40 to-slate-800/40">
-      {/* Navbar */}
-      <nav className="relative z-20 px-8 py-5 border-b border-white/20 flex items-center justify-between bg-white/10 backdrop-blur-md">
-        <Link to="/" className="flex items-center gap-3 group">
-          <div className="bg-white/10 p-2 rounded-xl group-hover:bg-white/20 transition-all">
-            <img src={logo} alt="StoodoMart" className="w-8 h-auto" />
-          </div>
-          <h1 className="text-xl font-extrabold text-white tracking-tight">Stoodo<span className="text-purple-400">Mart</span></h1>
-        </Link>
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate("/checkout")}
-            className="px-5 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/20 hover:-translate-y-0.5 transition-all active:scale-95"
-          >
-            + New Order
-          </button>
-          <Link to="/profile" className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm font-bold rounded-xl transition-all border border-white/10">
-            Back to Profile
-          </Link>
+    <div className="flex flex-col min-h-screen bg-slate-50 font-sans text-slate-900">
+      <Header />
+
+      <main className="flex-grow pt-32 pb-24 container mx-auto px-4 md:px-8 max-w-5xl">
+        
+        {/* Navigation Breadcrumbs */}
+        <div className="flex items-center justify-between mb-10">
+            <button 
+              onClick={() => navigate("/profile")}
+              className="flex items-center gap-2 text-slate-500 hover:text-brand-teal font-bold transition-colors group"
+            >
+             <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" /> Back to Profile
+            </button>
+            <Link 
+              to="/shop"
+              className="px-6 py-3 bg-slate-900 text-white font-black rounded-2xl shadow-xl shadow-slate-200 transition-all hover:bg-brand-teal hover:-translate-y-1 active:scale-95 flex items-center gap-2"
+            >
+              <Plus size={18} /> New Order
+            </Link>
         </div>
-      </nav>
 
-      <main className="flex-grow p-6 sm:p-10">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-extrabold text-white mb-1">My Orders</h2>
-          <p className="text-slate-300 mb-8 text-sm">Track your order history and status updates.</p>
+        <header className="mb-12">
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight mb-2 flex items-center gap-4">
+             <Package size={32} className="text-brand-teal" /> My Orders
+          </h1>
+          <p className="text-slate-500 font-medium">Track your campus purchases and delivery status updates.</p>
+        </header>
 
-          {error && (
-            <div className="mb-6 p-4 rounded-xl bg-red-500/20 border border-red-500/50 text-red-200 text-sm">{error}</div>
-          )}
+        {error && (
+          <div className="mb-8 p-4 rounded-2xl bg-red-50 border border-red-100 text-red-600 font-bold text-sm">{error}</div>
+        )}
 
+        <div className="space-y-6">
           {loading ? (
-            <div className="space-y-4">{[...Array(4)].map((_, i) => <SkeletonRow key={i} />)}</div>
+            <div>{[...Array(4)].map((_, i) => <SkeletonRow key={i} />)}</div>
           ) : orders.length === 0 ? (
-            <div className="text-center py-24 flex flex-col items-center gap-5">
-              <div className="bg-white/10 p-6 rounded-full">
-                <ShoppingBag size={48} className="text-purple-400" />
+            <div className="flex flex-col items-center justify-center py-32 px-8 text-center bg-white rounded-[2.5rem] border border-slate-200 shadow-sm">
+              <div className="w-24 h-24 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300 mb-6">
+                <ShoppingBag size={48} />
               </div>
-              <p className="text-white font-bold text-xl">No orders yet</p>
-              <p className="text-slate-400 text-sm">Place your first order to get started!</p>
+              <h2 className="text-2xl font-black text-slate-900 mb-2">No orders yet</h2>
+              <p className="text-slate-500 max-w-xs mb-8">Ready to start your first student exchange? Visit the shop to browse deals!</p>
               <button
-                onClick={() => navigate("/checkout")}
-                className="mt-2 px-8 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/20 hover:-translate-y-0.5 transition-all"
+                onClick={() => navigate("/shop")}
+                className="px-10 py-4 bg-brand-teal text-slate-900 font-black rounded-2xl transition-all shadow-lg shadow-brand-teal/20 hover:shadow-brand-teal/40 hover:-translate-y-1 active:scale-95"
               >
-                Shop Now
+                Start Shopping
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-6">
               {orders.map((order) => {
                 const statusInfo = STATUS_STYLES[order.status] || STATUS_STYLES.Pending;
                 return (
-                  <div key={order._id} className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl p-5 hover:bg-white/15 transition-all">
-                    <div className="flex items-start justify-between gap-4 mb-3">
+                  <div key={order._id} className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-200 hover:shadow-md transition-all group relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-slate-100 group-hover:bg-brand-teal transition-colors"></div>
+                    
+                    <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
                       <div>
-                        <p className="text-xs text-slate-400 font-mono mb-1">Order #{order._id.slice(-8).toUpperCase()}</p>
-                        <p className="text-white font-bold text-lg">Rs. {order.totalAmount.toLocaleString()}</p>
+                        <div className="flex items-center gap-3 mb-1">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Order Ref</span>
+                          <span className="font-mono text-xs font-bold text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded">#{order._id.slice(-8).toUpperCase()}</span>
+                        </div>
+                        <p className="text-2xl font-black text-slate-900 leading-tight">Rs. {order.totalAmount.toLocaleString('en-IN')}</p>
                       </div>
-                      <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${statusInfo.cls}`}>
+                      <span className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest border ${statusInfo.cls}`}>
                         {statusInfo.icon}{order.status}
                       </span>
+                    </header>
+
+                    <div className="space-y-6">
+                      <div className="flex items-start gap-3">
+                         <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 shrink-0 border border-slate-100">
+                           <Clock size={16} />
+                         </div>
+                         <div className="text-sm font-medium">
+                            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-0.5">Placed On</p>
+                            <p className="text-slate-700">{new Date(order.createdAt).toLocaleString("en-IN", { dateStyle: "long", timeStyle: "short" })}</p>
+                         </div>
+                      </div>
+
+                      <div className="flex items-start gap-3">
+                         <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 shrink-0 border border-slate-100">
+                           <ShoppingBag size={16} />
+                         </div>
+                         <div className="w-full">
+                            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1.5">Items Purchased</p>
+                            <div className="flex flex-wrap gap-2">
+                              {order.products.map((item, idx) => (
+                                <div key={idx} className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs transition-colors hover:bg-slate-100 group/item">
+                                  {item.productId?.image && (
+                                    <img src={item.productId.image} alt="" className="w-6 h-6 rounded-lg object-cover border border-white" />
+                                  )}
+                                  <span className="font-black text-slate-700">{item.productId?.name || "Deleted Product"}</span>
+                                  <span className="bg-slate-900 text-white text-[10px] px-1.5 rounded-md">x{item.quantity}</span>
+                                </div>
+                              ))}
+                            </div>
+                         </div>
+                      </div>
                     </div>
-                    <p className="text-slate-300 text-sm mb-3">
-                      <span className="text-slate-400">Address:</span> {order.address}
-                    </p>
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {order.products.map((item, idx) => (
-                        <div key={idx} className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-1.5 text-xs text-slate-300 border border-white/10">
-                          {item.productId?.image && (
-                            <img src={item.productId.image} alt="" className="w-5 h-5 rounded-full object-cover" />
-                          )}
-                          <span className="font-medium">{item.productId?.name || "Product"}</span>
-                          <span className="text-slate-400">x{item.quantity}</span>
-                          <span className="text-indigo-300">Rs. {item.price}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <p className="text-xs text-slate-500">{new Date(order.createdAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</p>
                   </div>
                 );
               })}
@@ -133,26 +157,30 @@ export default function MyOrders() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-4 mt-10">
+            <footer className="flex justify-center items-center gap-6 mt-16 pt-8 border-t border-slate-200">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="p-2 rounded-xl bg-white/10 border border-white/20 text-white disabled:opacity-30 hover:bg-white/20 transition-all"
+                className="p-4 rounded-2xl bg-white border border-slate-200 text-slate-700 disabled:opacity-30 hover:bg-slate-50 hover:text-brand-teal transition-all shadow-sm active:scale-95"
               >
                 <ChevronLeft size={20} />
               </button>
-              <span className="text-slate-300 font-bold text-sm">Page {page} of {totalPages}</span>
+              <div className="text-xs font-black uppercase tracking-widest text-slate-400">
+                Page <span className="text-slate-900">{page}</span> of {totalPages}
+              </div>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="p-2 rounded-xl bg-white/10 border border-white/20 text-white disabled:opacity-30 hover:bg-white/20 transition-all"
+                className="p-4 rounded-2xl bg-white border border-slate-200 text-slate-700 disabled:opacity-30 hover:bg-slate-50 hover:text-brand-teal transition-all shadow-sm active:scale-95"
               >
                 <ChevronRight size={20} />
               </button>
-            </div>
+            </footer>
           )}
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }

@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import axiosClient from "../utility/axios";
-import { Search, Edit2, Trash2, ShieldAlert, ChevronLeft, ChevronRight, User } from "lucide-react";
-import logo from "../assets/logo.png";
+import { Search, Edit2, Trash2, ShieldAlert, ChevronLeft, ChevronRight, User, ArrowLeft, Users, ShieldCheck } from "lucide-react";
 import { useSelector } from "react-redux";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 export default function AllProfiles() {
   const [profiles, setProfiles] = useState([]);
@@ -12,7 +13,8 @@ export default function AllProfiles() {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const { user } = useSelector((state) => state.auth);
+  const { user: currentUser } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
 
   const fetchProfiles = useCallback(async () => {
     setLoading(true);
@@ -44,7 +46,7 @@ export default function AllProfiles() {
   }, [searchTerm, page, fetchProfiles]);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this profile?")) return;
+    if (!window.confirm("Are you sure you want to delete this profile? This action is permanent.")) return;
     try {
       await axiosClient.delete(`/person/superdeleteprofile/${id}`);
       fetchProfiles();
@@ -54,171 +56,172 @@ export default function AllProfiles() {
   };
 
   return (
-    <div className="min-h-screen font-sans flex flex-col relative overflow-hidden bg-slate-800 bg-gradient-to-br from-indigo-500/40 via-purple-500/40 to-slate-800/40">
-      
-      {/* Navbar Integration */}
-      <nav className="relative z-20 px-8 py-5 border-b border-white/20 flex items-center justify-between w-full bg-white/10 backdrop-blur-md">
-        <Link to="/" className="flex items-center gap-3 group">
-          <div className="bg-white/10 p-2 rounded-xl backdrop-blur-md transition-all duration-300 group-hover:bg-white/20 group-hover:scale-105 shadow-sm">
-            <img src={logo} alt="StoodoMart Logo" className="w-8 h-auto transform group-hover:-rotate-6 transition-transform duration-300" />
-          </div>
-          <h1 className="text-xl font-extrabold tracking-tight text-white drop-shadow-md">
-            Stoodo<span className="text-purple-400">Mart</span>
-          </h1>
-        </Link>
-        
-        <div className="flex items-center gap-6">
-          <div className="relative w-72 group">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-300 w-5 h-5 transition-colors group-focus-within:text-purple-400" />
-            <input
-              type="text"
-              placeholder="Search by email..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setPage(1);
-              }}
-              className="w-full pl-10 pr-4 py-2 bg-slate-900/40 border border-slate-500/50 rounded-xl text-sm focus:ring-2 focus:ring-purple-400/50 outline-none transition-all duration-300 text-white placeholder-slate-400 hover:border-slate-400 focus:border-purple-400"
-            />
-          </div>
-          <Link
-            to="/profile"
-            className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold bg-white/10 text-white hover:bg-white/20 transition-all backdrop-blur-md active:scale-95 border border-white/10 shadow-lg"
-          >
-            <User size={18} />
-            <span>Profile Info</span>
-          </Link>
-        </div>
-      </nav>
+    <div className="flex flex-col min-h-screen bg-slate-50 font-sans text-slate-900">
+      <Header />
 
-      {/* Main Content Area */}
-      <main className="relative z-10 flex-1 p-8 max-w-7xl mx-auto w-full">
-        {/* Header and Error */}
-        <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-3xl font-extrabold text-white drop-shadow-md">User Directory</h2>
-        </div>
+      <main className="flex-grow pt-32 pb-24 container mx-auto px-4 md:px-8 max-w-7xl">
         
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+            <div className="flex-grow">
+              <button 
+                onClick={() => navigate("/profile")}
+                className="flex items-center gap-2 text-slate-500 hover:text-brand-teal font-bold mb-4 transition-colors group"
+              >
+               <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" /> Dashboard
+              </button>
+              <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight mb-2 flex items-center gap-4">
+                <Users size={36} className="text-brand-teal" /> User Directory
+              </h1>
+              <p className="text-slate-500 font-medium">Manage and audit system-wide user credentials and access levels.</p>
+            </div>
+
+            {/* In-page Search */}
+            <div className="w-full md:w-80 relative group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-teal transition-colors" size={18} />
+              <input
+                type="text"
+                placeholder="Search by email..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setPage(1);
+                }}
+                className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-slate-800 font-bold placeholder:text-slate-400 placeholder:font-medium focus:outline-none focus:ring-4 focus:ring-brand-teal/10 focus:border-brand-teal shadow-sm transition-all"
+              />
+            </div>
+        </div>
+
         {error && (
-          <div className="mb-6 p-4 rounded-xl bg-red-500/20 border border-red-500/50 text-red-100 flex items-center gap-3 backdrop-blur-sm">
-            <ShieldAlert size={20} />
-            <span className="font-medium">{error}</span>
+          <div className="mb-8 p-4 rounded-2xl bg-red-50 border border-red-100 text-red-600 text-sm flex items-center gap-3 font-bold">
+            <ShieldAlert size={18} className="shrink-0" />{error}
           </div>
         )}
 
-        {/* Loading / List */}
-        {loading ? (
-          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-6 overflow-hidden">
-             <div className="animate-pulse flex flex-col gap-6">
-                 {/* Table Header Skeleton */}
-                 <div className="flex gap-4 items-center w-full pb-4 border-b border-white/10">
-                     <div className="h-6 bg-white/20 rounded w-1/4"></div>
-                     <div className="h-6 bg-white/20 rounded w-1/4"></div>
-                     <div className="h-6 bg-white/20 rounded w-1/6 ml-auto"></div>
-                 </div>
-                 {/* Rows Skeleton */}
-                 {[1, 2, 3, 4, 5].map(i => (
-                    <div key={i} className="flex gap-6 items-center w-full py-2">
-                       <div className="w-10 h-10 bg-white/20 rounded-full flex-shrink-0"></div>
-                       <div className="h-5 bg-white/20 rounded w-1/4"></div>
-                       <div className="h-5 bg-white/20 rounded w-1/4"></div>
-                       <div className="h-8 bg-white/20 rounded-xl w-20 ml-auto mr-4"></div>
-                    </div>
-                 ))}
-             </div>
-          </div>
-        ) : profiles.length === 0 ? (
-          <div className="text-center py-20 text-slate-300 bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
-            <User size={56} className="mx-auto mb-4 opacity-50 text-indigo-300" />
-            <p className="text-xl font-medium">No profiles found.</p>
-          </div>
-        ) : (
-          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden transform transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-white/5 border-b border-white/10 text-slate-300 text-sm">
-                    <th className="py-5 px-6 font-bold uppercase tracking-wider">Name</th>
-                    <th className="py-5 px-6 font-bold uppercase tracking-wider">Email</th>
-                    <th className="py-5 px-6 font-bold uppercase tracking-wider">Role</th>
-                    <th className="py-5 px-6 font-bold uppercase tracking-wider text-right">Actions</th>
+        {/* Directory Table Container */}
+        <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden relative min-h-[500px]">
+          <div className="absolute top-0 left-0 w-full h-1 bg-brand-teal"></div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr className="bg-slate-50/50 border-b border-slate-100 text-slate-400 uppercase tracking-widest text-[10px] font-black">
+                  <th className="py-6 px-10">Identity</th>
+                  <th className="py-6 px-6">Email Address</th>
+                  <th className="py-6 px-6">System Role</th>
+                  <th className="py-6 px-10 text-right">Administrative Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {loading ? (
+                  [...Array(5)].map((_, i) => (
+                    <tr key={i} className="animate-pulse border-b border-slate-50">
+                      <td className="py-6 px-10">
+                        <div className="flex gap-4 items-center">
+                          <div className="w-12 h-12 bg-slate-100 rounded-full" />
+                          <div className="h-4 bg-slate-100 rounded w-32" />
+                        </div>
+                      </td>
+                      <td className="py-6 px-6"><div className="h-4 bg-slate-100 rounded w-48" /></td>
+                      <td className="py-6 px-6"><div className="h-6 bg-slate-100 rounded-full w-24" /></td>
+                      <td className="py-6 px-10 text-right"><div className="h-8 bg-slate-100 rounded-xl w-24 ml-auto" /></td>
+                    </tr>
+                  ))
+                ) : profiles.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="py-32 text-center">
+                      <div className="flex flex-col items-center gap-4 text-slate-300">
+                        <div className="w-20 h-20 rounded-3xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-2">
+                           <User size={40} />
+                        </div>
+                        <p className="font-black text-slate-900 text-xl tracking-tight">User not found</p>
+                        <p className="text-slate-500 max-w-xs mx-auto">No profiles match the email "{searchTerm}". Try a different search term.</p>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-white/10">
-                  {profiles.map((profile) => (
-                    <tr key={profile._id} className="group hover:bg-white/10 transition-all duration-300 ease-in-out cursor-default">
-                      <td className="py-4 px-6 text-white">
+                ) : (
+                  profiles.map((profile) => (
+                    <tr key={profile._id} className="group hover:bg-slate-50/50 transition-colors">
+                      <td className="py-6 px-10">
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 shadow-inner group-hover:from-indigo-400 group-hover:to-purple-500 flex items-center justify-center font-bold text-lg text-white transition-colors duration-300 border border-white/20">
-                                {(profile.firstname?.[0] || 'U').toUpperCase()}
+                            <div className="w-12 h-12 rounded-full border-2 border-white shadow-sm flex items-center justify-center font-black text-lg text-white bg-gradient-to-br from-brand-teal via-emerald-400 to-brand-green group-hover:scale-110 transition-transform duration-300 overflow-hidden">
+                                {profile.avatar ? (
+                                  <img src={profile.avatar} alt="" className="w-full h-full object-cover" />
+                                ) : (
+                                  (profile.firstname?.[0] || 'U').toUpperCase()
+                                )}
                             </div>
-                            <span className="font-bold text-white tracking-wide text-lg drop-shadow-sm">
+                            <span className="font-black text-slate-900 tracking-tight text-base">
                               {profile.firstname} {profile.lastname}
                             </span>
                         </div>
                       </td>
-                      <td className="py-4 px-6 text-slate-200 font-medium tracking-wide">{profile.email}</td>
-                      <td className="py-4 px-6">
-                        <span className={`px-4 py-1.5 text-xs font-bold rounded-full shadow-sm transition-all duration-300 border backdrop-blur-md ${
-                          profile.role === 'SuperAdmin' ? 'bg-purple-500/20 text-purple-200 border-purple-400/50' :
-                          profile.role === 'Admin' ? 'bg-blue-500/20 text-blue-200 border-blue-400/50' :
-                          'bg-slate-500/20 text-slate-200 border-slate-400/50'
+                      <td className="py-6 px-6 text-slate-500 font-bold text-sm tracking-tight">{profile.email}</td>
+                      <td className="py-6 px-6">
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${
+                          profile.role === 'SuperAdmin' ? 'bg-amber-50 text-amber-600 border-amber-100 shadow-sm shadow-amber-100' :
+                          profile.role === 'Admin' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' :
+                          'bg-slate-50 text-slate-500 border-slate-100'
                         }`}>
+                          {profile.role === 'SuperAdmin' && <ShieldCheck size={12} />}
                           {profile.role || 'User'}
                         </span>
                       </td>
-                      <td className="py-4 px-6 text-right">
-                        <div className="flex items-center justify-end gap-3 opacity-70 group-hover:opacity-100 transition-opacity duration-300">
+                      <td className="py-6 px-10 text-right">
+                        <div className="flex items-center justify-end gap-3 opacity-30 group-hover:opacity-100 transition-opacity">
                           <Link
                             to={`/superadmin/update-profile/${profile._id}`}
-                            className="p-2 text-indigo-300 hover:text-white bg-indigo-500/10 hover:bg-indigo-500/40 border border-transparent hover:border-indigo-400/50 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg"
-                            title="Update Profile"
+                            className="p-3 bg-white hover:bg-brand-teal text-slate-400 hover:text-slate-900 border border-slate-100 hover:border-brand-teal rounded-xl transition-all shadow-sm hover:shadow-md active:scale-95"
+                            title="Quick Edit"
                           >
-                            <Edit2 size={20} />
+                            <Edit2 size={16} />
                           </Link>
-                          {user?._id !== profile._id && (
+                          {currentUser?._id !== profile._id && (
                             <button
                               onClick={() => handleDelete(profile._id)}
-                              className="p-2 text-red-400 hover:text-white bg-red-500/10 hover:bg-red-500/60 border border-transparent hover:border-red-400/50 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                              className="p-3 bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-500 border border-slate-100 hover:border-rose-100 rounded-xl transition-all shadow-sm hover:shadow-md active:scale-95"
                               title="Delete Profile"
                             >
-                              <Trash2 size={20} />
+                              <Trash2 size={16} />
                             </button>
                           )}
                         </div>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="p-5 border-t border-white/10 flex items-center justify-between text-sm text-slate-200 bg-white/5">
-                <div className="font-medium bg-white/10 px-4 py-1.5 rounded-full border border-white/10">
-                  Page <span className="font-bold text-white">{page}</span> of <span className="font-bold text-white">{totalPages}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setPage(p => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                    className="p-2.5 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 text-white disabled:opacity-30 disabled:hover:bg-white/10 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95"
-                  >
-                    <ChevronLeft size={18} />
-                  </button>
-                  <button
-                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                    disabled={page === totalPages}
-                    className="p-2.5 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 text-white disabled:opacity-30 disabled:hover:bg-white/10 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95"
-                  >
-                    <ChevronRight size={18} />
-                  </button>
-                </div>
-              </div>
-            )}
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
-        )}
+
+          {/* Pagination Footer */}
+          {!loading && totalPages > 1 && (
+            <footer className="p-8 border-t border-slate-100 flex items-center justify-between bg-slate-50/30">
+              <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                Page <span className="text-slate-900">{page}</span> of {totalPages}
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 disabled:opacity-30 transition-all shadow-sm active:scale-95"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 disabled:opacity-30 transition-all shadow-sm active:scale-95"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+            </footer>
+          )}
+        </div>
       </main>
+
+      <Footer />
     </div>
   );
 }
