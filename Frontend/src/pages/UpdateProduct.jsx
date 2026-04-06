@@ -4,8 +4,21 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Link, useParams, useNavigate } from "react-router";
 import axiosClient from "../utility/axios";
-import logo from "../assets/logo.png";
-import { Loader2, Package, Tag, FileText, Image as ImageIcon, LayoutList, Hash, CheckCircle, AlertCircle, ChevronLeft } from "lucide-react";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import { 
+  Package as LucidePackage, 
+  Tag as LucideTag, 
+  FileText as LucideFileText, 
+  Image as LucideImage, 
+  LayoutList as LucideLayoutList, 
+  Hash as LucideHash, 
+  CheckCircle as LucideCheckCircle, 
+  AlertCircle as LucideAlertCircle, 
+  ArrowLeft as LucideArrowLeft, 
+  Save as LucideSave, 
+  Loader2 as LucideLoader2 
+} from "lucide-react";
 
 // Matches backend product expectations
 const productSchema = z.object({
@@ -91,7 +104,6 @@ export default function UpdateProduct() {
     try {
       const response = await axiosClient.put(`/product/updateproduct/${id}`, data);
       setSuccessMsg(response.data.message || "Product updated successfully!");
-      // Optionally redirect user back to My Products after a brief delay
       setTimeout(() => navigate('/my-products'), 1500);
     } catch (err) {
       setApiError(err.response?.data?.message || err.message || "Failed to update product");
@@ -101,145 +113,138 @@ export default function UpdateProduct() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-800 bg-gradient-to-br from-indigo-500/40 via-purple-500/40 to-slate-800/40 flex flex-col font-sans relative overflow-hidden">
-        
-      {/* Navbar Integration */}
-      <nav className="relative z-20 px-8 py-5 border-b border-white/20 flex items-center justify-between w-full bg-white/10 backdrop-blur-md">
-        <Link to="/" className="flex items-center gap-3 group">
-          <div className="bg-white/10 p-2 rounded-xl backdrop-blur-md transition-all duration-300 group-hover:bg-white/20 group-hover:scale-105 shadow-sm">
-            <img src={logo} alt="StoodoMart Logo" className="w-8 h-auto transform group-hover:-rotate-6 transition-transform duration-300" />
-          </div>
-          <h1 className="text-xl font-extrabold tracking-tight text-white drop-shadow-md">
-            Stoodo<span className="text-purple-400">Mart</span>
-          </h1>
-        </Link>
-        
-        <div className="flex items-center gap-6">
-          <Link
-            to="/my-products"
-            className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold bg-white/10 text-white hover:bg-white/20 transition-all backdrop-blur-md active:scale-95 border border-white/10 shadow-lg"
-          >
-            <ChevronLeft size={18} />
-            <span>Cancel</span>
-          </Link>
-        </div>
-      </nav>
+    <div className="flex flex-col min-h-screen bg-slate-50 font-sans text-slate-900">
+      <Header />
 
-      {/* Main Form Content */}
-      <main className="relative z-10 flex-grow flex justify-center items-start py-10 px-4 sm:px-6">
-        <div className="w-full max-w-2xl bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden">
+      <main className="flex-grow pt-32 pb-24 container mx-auto px-4 md:px-8 flex justify-center">
+        
+        <div className="w-full max-w-2xl">
           
-          <div className="px-8 py-6 border-b border-white/10 bg-white/5">
-            <h1 className="text-2xl font-bold text-white mb-1 drop-shadow-md">Update Product</h1>
-            <p className="text-sm text-slate-300">Modify the details below to update your product in the catalog.</p>
-          </div>
+          <button 
+            onClick={() => navigate("/my-products")}
+            className="flex items-center gap-2 text-slate-500 hover:text-brand-teal font-bold mb-8 transition-colors group"
+          >
+           <LucideArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" /> Back to Inventory
+          </button>
 
-          <div className="p-8">
+          <div className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-sm border border-slate-200 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-2 bg-brand-teal"></div>
+            
+            <header className="mb-10">
+              <div className="flex items-center gap-4 mb-3">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
+                  <LucidePackage size={24} />
+                </div>
+                <h1 className="text-3xl font-black text-slate-900 leading-tight">Edit Product</h1>
+              </div>
+              <p className="text-slate-500 leading-relaxed font-medium">Update your product details and availability status.</p>
+            </header>
+
             {apiError && (
-              <div className="mb-6 p-4 rounded-xl bg-red-500/20 border border-red-500/50 text-red-100 text-sm flex items-center gap-3 backdrop-blur-sm">
-                <AlertCircle size={18} className="shrink-0" />
+              <div className="mb-8 p-4 rounded-2xl bg-red-50 border border-red-100 text-red-600 text-sm flex items-center gap-3 font-bold">
+                <LucideAlertCircle size={18} className="shrink-0" />
                 <span>{apiError}</span>
               </div>
             )}
 
             {successMsg && (
-              <div className="mb-6 p-4 rounded-xl bg-green-500/20 border border-green-500/50 text-green-100 text-sm flex items-center gap-3 backdrop-blur-sm">
-                <CheckCircle size={18} className="shrink-0" />
+              <div className="mb-8 p-4 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 text-sm flex items-center gap-3 font-bold">
+                <LucideCheckCircle size={18} className="shrink-0" />
                 <span>{successMsg}</span>
               </div>
             )}
 
             {fetching ? (
-                 <div className="flex flex-col items-center justify-center py-12 gap-4">
-                     <Loader2 size={40} className="animate-spin text-purple-400" />
-                     <p className="text-indigo-200 font-medium animate-pulse">Loading product details...</p>
+                 <div className="flex flex-col items-center justify-center py-20 gap-4">
+                     <LucideLoader2 size={40} className="animate-spin text-brand-teal" />
+                     <p className="text-slate-400 font-bold animate-pulse uppercase tracking-widest text-xs">Fetching Details...</p>
                  </div>
             ) : (
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
                 
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-200 ml-1">Product Name *</label>
+                <div className="space-y-2 group">
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1 group-focus-within:text-brand-teal transition-colors">Product Name *</label>
                     <div className="relative">
-                    <Package className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 pointer-events-none" />
-                    <input
-                        type="text"
-                        {...register("name")}
-                        className={`w-full pl-11 pr-4 py-3 bg-white/10 border ${errors.name ? 'border-red-400 focus:border-red-400' : 'border-white/20 focus:border-indigo-400'} rounded-xl text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all shadow-sm`}
-                        placeholder="e.g. Wireless Headphones"
-                    />
+                      <LucidePackage size={18} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-300 group-focus-within:text-brand-teal transition-colors" />
+                      <input
+                          type="text"
+                          {...register("name")}
+                          className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-brand-teal/10 focus:border-brand-teal focus:bg-white transition-all font-bold"
+                          placeholder="e.g. Wireless Headphones"
+                      />
                     </div>
-                    {errors.name && <p className="text-red-400 text-xs ml-1 font-medium">{errors.name.message}</p>}
+                    {errors.name && <p className="text-red-500 text-xs ml-1 font-bold">{errors.name.message}</p>}
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-200 ml-1">Price (Rs.) *</label>
-                    <div className="relative">
-                        <Tag className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 pointer-events-none" />
-                        <input
-                        type="number"
-                        step="0.01"
-                        {...register("price")}
-                        className={`w-full pl-11 pr-4 py-3 bg-white/10 border ${errors.price ? 'border-red-400 focus:border-red-400' : 'border-white/20 focus:border-indigo-400'} rounded-xl text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all shadow-sm`}
-                        placeholder="0.00"
-                        />
-                    </div>
-                    {errors.price && <p className="text-red-400 text-xs ml-1 font-medium">{errors.price.message}</p>}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-2 group">
+                      <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1 group-focus-within:text-brand-teal transition-colors">Selling Price (Rs.) *</label>
+                      <div className="relative">
+                          <LucideTag size={18} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-300 group-focus-within:text-brand-teal transition-colors" />
+                          <input
+                          type="number"
+                          step="0.01"
+                          {...register("price")}
+                          className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-brand-teal/10 focus:border-brand-teal focus:bg-white transition-all font-bold"
+                          placeholder="0.00"
+                          />
+                      </div>
+                      {errors.price && <p className="text-red-500 text-xs ml-1 font-bold">{errors.price.message}</p>}
                     </div>
 
-                    <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-200 ml-1">Stock Quantity *</label>
-                    <div className="relative">
-                        <Hash className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 pointer-events-none" />
-                        <input
-                        type="number"
-                        {...register("stock")}
-                        className={`w-full pl-11 pr-4 py-3 bg-white/10 border ${errors.stock ? 'border-red-400 focus:border-red-400' : 'border-white/20 focus:border-indigo-400'} rounded-xl text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all shadow-sm`}
-                        placeholder="e.g. 50"
-                        />
-                    </div>
-                    {errors.stock && <p className="text-red-400 text-xs ml-1 font-medium">{errors.stock.message}</p>}
+                    <div className="space-y-2 group">
+                      <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1 group-focus-within:text-brand-teal transition-colors">Inventory Stock *</label>
+                      <div className="relative">
+                          <LucideHash size={18} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-300 group-focus-within:text-brand-teal transition-colors" />
+                          <input
+                          type="number"
+                          {...register("stock")}
+                          className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-brand-teal/10 focus:border-brand-teal focus:bg-white transition-all font-bold"
+                          placeholder="e.g. 50"
+                          />
+                      </div>
+                      {errors.stock && <p className="text-red-500 text-xs ml-1 font-bold">{errors.stock.message}</p>}
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-200 ml-1">Used For (Duration) *</label>
-                    <div className="relative">
-                        <FileText className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 pointer-events-none" />
-                        <input
-                        type="text"
-                        {...register("usedFor")}
-                        className={`w-full pl-11 pr-4 py-3 bg-white/10 border ${errors.usedFor ? 'border-red-400 focus:border-red-400' : 'border-white/20 focus:border-indigo-400'} rounded-xl text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all shadow-sm`}
-                        placeholder="e.g. 6 Months"
-                        />
-                    </div>
-                    {errors.usedFor && <p className="text-red-400 text-xs ml-1 font-medium">{errors.usedFor.message}</p>}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-2 group">
+                      <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1 group-focus-within:text-brand-teal transition-colors">Used For (Duration) *</label>
+                      <div className="relative">
+                          <LucideFileText size={18} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-300 group-focus-within:text-brand-teal transition-colors" />
+                          <input
+                          type="text"
+                          {...register("usedFor")}
+                          className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-brand-teal/10 focus:border-brand-teal focus:bg-white transition-all font-bold"
+                          placeholder="e.g. 1 Semester"
+                          />
+                      </div>
+                      {errors.usedFor && <p className="text-red-500 text-xs ml-1 font-bold">{errors.usedFor.message}</p>}
                     </div>
 
-                    <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-200 ml-1">Original Price (Rs.) *</label>
-                    <div className="relative">
-                        <Tag className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 pointer-events-none" />
-                        <input
-                        type="number"
-                        step="0.01"
-                        {...register("originalPrice")}
-                        className={`w-full pl-11 pr-4 py-3 bg-white/10 border ${errors.originalPrice ? 'border-red-400 focus:border-red-400' : 'border-white/20 focus:border-indigo-400'} rounded-xl text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all shadow-sm`}
-                        placeholder="0.00"
-                        />
-                    </div>
-                    {errors.originalPrice && <p className="text-red-400 text-xs ml-1 font-medium">{errors.originalPrice.message}</p>}
+                    <div className="space-y-2 group">
+                      <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1 group-focus-within:text-brand-teal transition-colors">Original Price (Rs.) *</label>
+                      <div className="relative">
+                          <LucideTag size={18} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-300 group-focus-within:text-brand-teal transition-colors" />
+                          <input
+                          type="number"
+                          step="0.01"
+                          {...register("originalPrice")}
+                          className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-brand-teal/10 focus:border-brand-teal focus:bg-white transition-all font-bold"
+                          placeholder="0.00"
+                          />
+                      </div>
+                      {errors.originalPrice && <p className="text-red-500 text-xs ml-1 font-bold">{errors.originalPrice.message}</p>}
                     </div>
                 </div>
 
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-200 ml-1">Category *</label>
+                <div className="space-y-2 group">
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1 group-focus-within:text-brand-teal transition-colors">Product Category *</label>
                     <div className="relative">
-                    <LayoutList className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 pointer-events-none" />
+                    <LucideLayoutList size={18} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-300 pointer-events-none group-focus-within:text-brand-teal transition-colors" />
                     <select
                         {...register("category")}
-                        className={`w-full pl-11 pr-4 py-3 bg-white/10 border ${errors.category ? 'border-red-400 focus:border-red-400' : 'border-white/20 focus:border-indigo-400'} rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all shadow-sm appearance-none cursor-pointer [&>option]:bg-slate-800`}
+                        className="w-full pl-12 pr-10 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 font-bold focus:outline-none focus:ring-4 focus:ring-brand-teal/10 focus:border-brand-teal focus:bg-white transition-all appearance-none cursor-pointer"
                     >
                         <option value="" disabled>Select a category</option>
                         <option value="Electronics">Electronics</option>
@@ -248,49 +253,53 @@ export default function UpdateProduct() {
                         <option value="Other">Other</option>
                     </select>
                     </div>
-                    {errors.category && <p className="text-red-400 text-xs ml-1 font-medium">{errors.category.message}</p>}
+                    {errors.category && <p className="text-red-500 text-xs ml-1 font-bold">{errors.category.message}</p>}
                 </div>
 
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-200 ml-1">Image URL *</label>
+                <div className="space-y-2 group">
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1 group-focus-within:text-brand-teal transition-colors">Direct Image URL *</label>
                     <div className="relative">
-                    <ImageIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 pointer-events-none" />
+                    <LucideImage size={18} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-300 group-focus-within:text-brand-teal transition-colors" />
                     <input
                         type="url"
                         {...register("image")}
-                        className={`w-full pl-11 pr-4 py-3 bg-white/10 border ${errors.image ? 'border-red-400 focus:border-red-400' : 'border-white/20 focus:border-indigo-400'} rounded-xl text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all shadow-sm`}
+                        className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-brand-teal/10 focus:border-brand-teal focus:bg-white transition-all font-bold"
                         placeholder="https://example.com/image.png"
                     />
                     </div>
-                    {errors.image && <p className="text-red-400 text-xs ml-1 font-medium">{errors.image.message}</p>}
+                    {errors.image && <p className="text-red-500 text-xs ml-1 font-bold">{errors.image.message}</p>}
+                    <p className="text-[10px] text-slate-400 font-medium ml-1">Tip: Use an image hosting service for the fastest results.</p>
                 </div>
 
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-200 ml-1">Description *</label>
+                <div className="space-y-2 group">
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1 group-focus-within:text-brand-teal transition-colors">Description / Product Notes *</label>
                     <div className="relative">
-                    <FileText className="absolute left-4 top-4 text-slate-400 w-5 h-5 pointer-events-none" />
+                    <LucideFileText size={18} className="absolute left-4 top-4 text-slate-300 group-focus-within:text-brand-teal transition-colors" />
                     <textarea
                         {...register("description")}
                         rows="4"
-                        className={`w-full pl-11 pr-4 py-3 bg-white/10 border ${errors.description ? 'border-red-400 focus:border-red-400' : 'border-white/20 focus:border-indigo-400'} rounded-xl text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all shadow-sm resize-none`}
-                        placeholder="Describe the product details..."
+                        className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-brand-teal/10 focus:border-brand-teal focus:bg-white transition-all font-bold resize-none"
+                        placeholder="Describe the condition, features, or accessories included..."
                     />
                     </div>
-                    {errors.description && <p className="text-red-400 text-xs ml-1 font-medium">{errors.description.message}</p>}
+                    {errors.description && <p className="text-red-500 text-xs ml-1 font-bold">{errors.description.message}</p>}
                 </div>
 
-                <div className="pt-4 flex items-center justify-end border-t border-white/10 gap-4 mt-6">
+                <div className="pt-8 flex flex-col sm:flex-row gap-4 items-center justify-between border-t border-slate-100">
+                    <p className="text-slate-400 text-xs font-medium italic">Changes will reflect immediately on the site.</p>
                     <button
                         type="submit"
                         disabled={loading || !isDirty}
-                        className="w-full sm:w-auto px-10 py-3.5 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-bold rounded-xl shadow-[0_10px_20px_rgba(99,102,241,0.3)] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+                        className="w-full sm:w-auto px-10 py-5 bg-slate-900 hover:bg-brand-teal text-white font-black rounded-2xl shadow-xl shadow-slate-200 transition-all hover:-translate-y-1 active:scale-95 flex justify-center items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed group"
                     >
                     {loading ? (
-                        <div className="flex items-center gap-2">
-                            <Loader2 size={18} className="animate-spin" />
+                        <span className="flex items-center gap-2">
+                            <LucideLoader2 size={20} className="animate-spin" />
                             <span>Updating...</span>
-                        </div>
-                    ) : "Save Changes"}
+                        </span>
+                    ) : (
+                      <><LucideSave size={20} className="group-hover:rotate-12 transition-transform" /> Save Changes</>
+                    )}
                     </button>
                 </div>
                 </form>
@@ -298,6 +307,8 @@ export default function UpdateProduct() {
           </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }
