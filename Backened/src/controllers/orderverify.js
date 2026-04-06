@@ -135,7 +135,7 @@ const GetOneOrder = async (req, res) => {
 const GetAllOrders = async (req, res) => {
     try {
         let { page, limit, status } = req.query;
-        page  = parseInt(page)  || 1;
+        page = parseInt(page) || 1;
         limit = parseInt(limit) || 10;
         const skip = (page - 1) * limit;
 
@@ -150,7 +150,7 @@ const GetAllOrders = async (req, res) => {
             .sort({ createdAt: -1 });  // newest first
 
         const totalOrders = await Order.countDocuments(query);
-        const totalPages  = Math.ceil(totalOrders / limit);
+        const totalPages = Math.ceil(totalOrders / limit);
 
         res.status(200).json({
             message: "All orders fetched successfully",
@@ -169,7 +169,7 @@ const GetAllOrders = async (req, res) => {
 const GetMyOrders = async (req, res) => {
     try {
         let { page, limit } = req.query;
-        page  = parseInt(page)  || 1;
+        page = parseInt(page) || 1;
         limit = parseInt(limit) || 10;
         const skip = (page - 1) * limit;
 
@@ -182,7 +182,7 @@ const GetMyOrders = async (req, res) => {
             .sort({ createdAt: -1 });  // newest first
 
         const totalOrders = await Order.countDocuments({ userId });
-        const totalPages  = Math.ceil(totalOrders / limit);
+        const totalPages = Math.ceil(totalOrders / limit);
 
         res.status(200).json({
             message: "My orders fetched successfully",

@@ -7,18 +7,18 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 font-sans">
       <Header />
-      
+
       {/* Main Content Area */}
       <main className="flex-grow">
         <HeroSection />
-        
+
         {/* Placeholder for Featured Categories / Products Grid */}
         <section className="py-20 container mx-auto px-4 md:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-extrabold text-slate-900 mb-4">Featured Categories</h2>
             <div className="w-24 h-1 bg-brand-teal mx-auto rounded-full"></div>
           </div>
-          
+
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Mock Category Cards */}
             {[
@@ -38,7 +38,7 @@ export default function Home() {
               </div>
             ))}
           </div>
-          
+
         </section>
       </main>
 
