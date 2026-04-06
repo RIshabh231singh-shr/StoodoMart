@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const cloudinary = require("../config/cloudinary");
 const sendEmail = require("../Utility/sendEmail");
+const sendFlexibleEmail = require("../Utility/mailer");
 
 
 // Helper to upload buffer to Cloudinary
@@ -413,6 +414,68 @@ const changeCurrentPassword = async (req, res) => {
 
 }
 
+const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({ message: "Email is required" });
+        }
+
+        const person = await Person.findOne({ email });
+        if (!person) {
+            return res.status(404).json({ message: "User not found with this email" });
+        }
+
+        const otp = crypto.randomInt(100000, 999999).toString();
+        person.otp = otp;
+        person.otpExpiry = Date.now() + 15 * 60 * 1000; // 15 mins expiry
+        await person.save({ validateBeforeSave: false });
+
+        const emailOptions = {
+            email: person.email,
+            subject: 'StoodoMart Password Reset',
+            message: `Your OTP for password reset is ${otp}. It is valid for 15 minutes.`,
+            html: `<h3>Password Reset Requested</h3><p>Your OTP for password reset is <strong>${otp}</strong>.</p><p>It is valid for 15 minutes.</p>`
+        };
+
+        await sendFlexibleEmail(emailOptions);
+
+        res.status(200).json({ message: "OTP sent to your email" });
+    } catch (error) {
+        console.error("Error in forgotPassword:", error);
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+};
+
+const resetPassword = async (req, res) => {
+    try {
+        const { email, otp, newPassword } = req.body;
+        if (!email || !otp || !newPassword) {
+            return res.status(400).json({ message: "Email, OTP and new password are required" });
+        }
+
+        const person = await Person.findOne({ email });
+        if (!person) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        if (person.otp !== otp || person.otpExpiry < Date.now()) {
+            return res.status(400).json({ message: "Invalid or expired OTP" });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        person.password = await bcrypt.hash(newPassword, salt);
+        person.otp = undefined;
+        person.otpExpiry = undefined;
+        await person.save({ validateBeforeSave: false });
+
+        res.status(200).json({ message: "Password reset successfully. You can now login." });
+    } catch (error) {
+        console.error("Error in resetPassword:", error);
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+};
+
 
 
 module.exports = {
@@ -427,5 +490,7 @@ module.exports = {
     promoteToAdmin,
     verifyOtp,
     changeCurrentPassword,
+    forgotPassword,
+    resetPassword,
 
 };

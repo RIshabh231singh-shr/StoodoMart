@@ -5,6 +5,7 @@ import { CheckAuthThunk } from './Authslice';
 import { fetchCart } from './CartSlice';
 import Login from './pages/login';
 import Signup from './pages/signup';
+import ForgotPassword from './pages/ForgotPassword';
 import Profile from './pages/Profile';
 import UpdateProfile from './pages/UpdateProfile';
 import AddProduct from './pages/AddProduct';
@@ -189,6 +190,14 @@ export default function App() {
           element={
             <ProtectedAuthRoute>
               <Signup />
+            </ProtectedAuthRoute>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <ProtectedAuthRoute>
+              <ForgotPassword />
             </ProtectedAuthRoute>
           }
         />

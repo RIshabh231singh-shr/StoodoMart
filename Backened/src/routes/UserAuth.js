@@ -2,7 +2,7 @@ const express = require("express");
 const AuthRouter = express.Router();
 
 const {
-    register, updateprofile, deleteprofile, login, getOneProfile, getAllProfile, logout, verifyAuth, promoteToAdmin, verifyOtp, changeCurrentPassword
+    register, updateprofile, deleteprofile, login, getOneProfile, getAllProfile, logout, verifyAuth, promoteToAdmin, verifyOtp, changeCurrentPassword, forgotPassword, resetPassword
 } = require("../controllers/personverify");
 
 const AdminMiddleware = require("../middlewares/adminmiddleware");
@@ -29,5 +29,7 @@ AuthRouter.get("/verify", userMiddleware, verifyAuth);
 AuthRouter.post("/promote", userMiddleware, promoteToAdmin);
 AuthRouter.post("/verify-otp", verifyOtp);
 AuthRouter.patch("/change-password", userMiddleware, changeCurrentPassword);
+AuthRouter.post("/forgot-password", forgotPassword);
+AuthRouter.post("/reset-password", resetPassword);
 
 module.exports = AuthRouter;
