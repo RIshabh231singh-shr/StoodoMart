@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import axiosClient from "../utility/axios";
 import { Search, Loader2, Package, ShoppingCart } from "lucide-react";
 import { selectCurrentCollege } from "../CollegeSlice";
@@ -57,7 +57,7 @@ export default function Shop() {
       // Clean the URL so refreshing doesn't re-apply the old search
       navigate('/shop', { replace: true });
     }
-  }, []);  // only run once on mount
+  }, [location.search, navigate]);  // Added missing dependencies
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);

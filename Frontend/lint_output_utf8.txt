@@ -1,0 +1,47 @@
+﻿
+> frontend@0.0.0 lint
+> eslint .
+
+
+C:\Users\risha\OneDrive\Desktop\RohitNegi WEBDEV\StoodoMart\Frontend\src\pages\AddProduct.jsx
+  303:1  error  Parsing error: Unexpected token }
+
+C:\Users\risha\OneDrive\Desktop\RohitNegi WEBDEV\StoodoMart\Frontend\src\pages\AdminOrders.jsx
+  257:32  error  Parsing error: Unexpected token ===
+
+C:\Users\risha\OneDrive\Desktop\RohitNegi WEBDEV\StoodoMart\Frontend\src\pages\AdminRequests.jsx
+  153:23  error  Parsing error: Unterminated regular expression
+
+C:\Users\risha\OneDrive\Desktop\RohitNegi WEBDEV\StoodoMart\Frontend\src\pages\AllProfiles.jsx
+  225:36  error  Parsing error: Unexpected token ===
+
+C:\Users\risha\OneDrive\Desktop\RohitNegi WEBDEV\StoodoMart\Frontend\src\pages\BuyAndSell.jsx
+  335:15  error  Parsing error: Adjacent JSX elements must be wrapped in an enclosing tag
+
+C:\Users\risha\OneDrive\Desktop\RohitNegi WEBDEV\StoodoMart\Frontend\src\pages\Categories.jsx
+  86:3  error  Parsing error: Unexpected token )
+
+C:\Users\risha\OneDrive\Desktop\RohitNegi WEBDEV\StoodoMart\Frontend\src\pages\CategoryPage.jsx
+  169:7  error  Parsing error: Unexpected token <
+
+C:\Users\risha\OneDrive\Desktop\RohitNegi WEBDEV\StoodoMart\Frontend\src\pages\Contact.jsx
+  214:3  error  Parsing error: Unexpected token )
+
+C:\Users\risha\OneDrive\Desktop\RohitNegi WEBDEV\StoodoMart\Frontend\src\pages\MyOrders.jsx
+  159:11  error  Parsing error: Unexpected token )
+
+C:\Users\risha\OneDrive\Desktop\RohitNegi WEBDEV\StoodoMart\Frontend\src\pages\PlaceOrder.jsx
+  254:15  error  Parsing error: Unexpected token <
+
+C:\Users\risha\OneDrive\Desktop\RohitNegi WEBDEV\StoodoMart\Frontend\src\pages\Privacy.jsx
+  232:7  error  Parsing error: Unexpected token <
+
+C:\Users\risha\OneDrive\Desktop\RohitNegi WEBDEV\StoodoMart\Frontend\src\pages\Returns.jsx
+  141:7  error  Parsing error: Unexpected token <
+
+C:\Users\risha\OneDrive\Desktop\RohitNegi WEBDEV\StoodoMart\Frontend\src\pages\Shop.jsx
+   3:10  error    'useDispatch' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                   no-unused-vars
+  60:6   warning  React Hook useEffect has missing dependencies: 'location.search' and 'navigate'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+Γ£û 14 problems (13 errors, 1 warning)
+
