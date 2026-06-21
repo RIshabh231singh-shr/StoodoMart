@@ -18,7 +18,7 @@ app.use(express.json());
 // Solve CORS issue
 const cors = require("cors");
 app.use(cors({
-  origin: ["http://localhost:5173","https://69d3f68a9fde2e9f8239a821--bejewelled-donut-6d3ddc.netlify.app"],
+  origin: ["http://localhost:5173","https://stoodomart-294d5.netlify.app/"],
   credentials: true
 }));
 const authRouter    = require("./routes/UserAuth");
