@@ -62,13 +62,13 @@ export default function Signup() {
   });
 
   const onSubmit = async (data) => {
-    const registerData = { ...data };
-    delete registerData.confirmPassword;
-    registerData.role = 'User';
-    const result = await dispatch(RegisterUser(registerData));
+    const registerData = { ...data };  // copy form data
+    delete registerData.confirmPassword;  // remove confirm password
+    registerData.role = 'User'; // set role as user
+    const result = await dispatch(RegisterUser(registerData)); // call register user thunk
 
-    if (!result.error) {
-      setUserEmail(data.email);
+    if (!result.error) { // if no error
+      setUserEmail(data.email); // set user email
       setStep(2);   // move to OTP screen
     }
 
@@ -82,7 +82,7 @@ export default function Signup() {
     setOtpError('');
     await dispatch(VerifyOtpThunk({ email: userEmail, otp: otpValue }));
     // isAuthenticated will become true → useEffect will navigate to '/'
-  };
+  };   
 
 
 

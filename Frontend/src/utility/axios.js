@@ -3,12 +3,13 @@ import axios from "axios";
 import { store } from "../store/store";
 
 const axiosClient = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: ["http://localhost:8000","https://stoodomart.onrender.com"],
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
+
 
 axiosClient.interceptors.response.use(
   (response) => {
