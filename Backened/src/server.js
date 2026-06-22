@@ -18,7 +18,7 @@ app.use(express.json());
 // Solve CORS issue
 const cors = require("cors");
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin:  "https://studentmart-frontend-lef4.onrender.com", // Update this to your frontend URL
   credentials: true
 }));
 const authRouter    = require("./routes/UserAuth");

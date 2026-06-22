@@ -3,7 +3,7 @@ import axios from "axios";
 import { store } from "../store/store";
 
 const axiosClient = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: "https://studentmart-df5t.onrender.com/",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
