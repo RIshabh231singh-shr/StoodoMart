@@ -10,7 +10,7 @@ async function runQuiz() {
 
     console.log("1. Triggering Send OTP...");
     try {
-        const response1 = await axios.post('http://localhost:8000/person/send-otp', { email });
+        const response1 = await axios.post('https://studentmart-frontend-lef4.onrender.com/person/send-otp', { email });
         console.log("Send OTP response:", response1.data);
     } catch (err) {
         console.error("Send OTP failed:", err.response ? err.response.data : err.message);
@@ -28,7 +28,7 @@ async function runQuiz() {
 
     console.log("\n3. Testing Registration with STRICT Match OTP...");
     try {
-        const response2 = await axios.post('http://localhost:8000/person/register', {
+        const response2 = await axios.post('https://studentmart-frontend-lef4.onrender.com/person/register', {
             firstname: "Strict",
             lastname: "Match",
             email: email,
@@ -47,7 +47,7 @@ async function runQuiz() {
 
     console.log("\n4. Testing Registration with a mismatch OTP to confirm difference...");
     try {
-        const response3 = await axios.post('http://localhost:8000/person/register', {
+        const response3 = await axios.post('https://studentmart-frontend-lef4.onrender.com/person/register', {
             firstname: "Strict",
             lastname: "Match",
             email: email,
